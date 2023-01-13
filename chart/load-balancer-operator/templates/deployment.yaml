@@ -42,7 +42,7 @@ spec:
         - name: {{ .Chart.Name }}
           env:
             - name: LOADBALANCEROPERATOR_CHART_PATH
-              value: "{{ .Values.operator.chart.path | default "/chart.tgz" }}"
+              value: "/chart.tgz"
             - name: LOADBALANCEROPERATOR_NATS_URL
               value: "{{ .Values.operator.events.connectionURL }}"
             - name: LOADBALANCEROPERATOR_NATS_STREAM_NAME
@@ -50,12 +50,12 @@ spec:
             - name: LOADBALANCEROPERATOR_NATS_SUBJECT_PREFIX
               value: "{{ .Values.operator.events.subjects }}"
           {{- if .Values.operator.events.auth.secretName }}
-            - name: LOADBALANCEROPERATOR_NATS_NKEY
-              value: "{{ .Values.operator.events.auth.credsPath | default "/creds" }}"
+            - name: LOADBALANCEROPERATOR_NATS_CREDS_FILE
+              value: "/creds"
           {{ end }}
           {{ if .Values.operator.chart.valuesPath }}
             - name: LOADBALANCEROPERATOR_CHART_VALUES_PATH
-              value: "{{ .Values.operator.chart.valuesPath }}"
+              value: "/lb-values.yaml"
           {{ end }}
           {{- if .Values.operator.securityContext }}
           securityContext:
@@ -84,17 +84,25 @@ spec:
               path: /readyz
               port: hc
           volumeMounts:
-            - name: chart-path
+            - name: chart-config
               mountPath: /chart.tgz
+              subPath: chart.tgz
+            {{- if ne .Values.operator.chart.valuesPathKey "" }}
+            - name: chart-config
+              mountPath: /lb-values.yaml
+              subPath: values.yaml
+#            - name: chart-path
+#              mountPath: /chart.tgz
+            {{- end }}
             {{- if .Values.operator.events.auth.secretName  }}
             - name: events-creds
-              mountPath: {{ .Values.operator.events.auth.credsPath | default "/creds" }}
+              mountPath: /creds
               subPath: "creds"
             {{- end }}
-            {{- if ne .Values.operator.chart.valuesPath "" }}
-            - name: chart-values-path
-              mountPath: {{ .Values.operator.chart.valuesPath }}
-            {{- end }}
+#            {{- if ne .Values.operator.chart.valuesPath "" }}
+#            - name: chart-values-path
+#              mountPath: {{ .Values.operator.chart.valuesPath }}
+#            {{- end }}
           resources:
             {{- toYaml .Values.operator.resources | nindent 12 }}
       {{- with .Values.operator.nodeSelector }}
@@ -129,4 +137,8 @@ spec:
           secret:
             secretName: "{{ .Values.operator.events.auth.secretName }}"
         {{- end }}
+        - name: chart-config
+          configMap:
+            name: "{{ .Values.operator.chart.configMapName }}"
+            
 
