@@ -34,12 +34,10 @@ func (s *Server) CreateNamespace(groupID string) error {
 		return err
 	}
 
-	kind := "Namespace"
-	apiv := "v1"
 	apSpec := applyv1.NamespaceApplyConfiguration{
 		TypeMetaApplyConfiguration: applymetav1.TypeMetaApplyConfiguration{
-			Kind:       &kind,
-			APIVersion: &apiv,
+			Kind:       strPt("Namespace"),
+			APIVersion: strPt("v1"),
 		},
 		ObjectMetaApplyConfiguration: &applymetav1.ObjectMetaApplyConfiguration{
 			Name: &groupID,
@@ -64,6 +62,13 @@ func (s *Server) CreateNamespace(groupID string) error {
 
 func attachRoleBinding(ctx context.Context, client *kubernetes.Clientset, namespace string) error {
 	apSpec := rbacapplyv1.RoleBindingApplyConfiguration{
+		ObjectMetaApplyConfiguration: &applymetav1.ObjectMetaApplyConfiguration{
+			Name: strPt("load-balancer-operator-admin"),
+		},
+		TypeMetaApplyConfiguration: applymetav1.TypeMetaApplyConfiguration{
+			Kind:       strPt("RoleBinding"),
+			APIVersion: strPt("rbac.authorization.k8s.io/v1"),
+		},
 		RoleRef: &rbacapplyv1.RoleRefApplyConfiguration{Kind: strPt("ClusterRole"), Name: strPt("cluster-admin")},
 		Subjects: []rbacapplyv1.SubjectApplyConfiguration{
 			{
