@@ -11,6 +11,7 @@ import (
 	"go.uber.org/zap"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 
@@ -178,15 +179,6 @@ func TestNewDeployment(t *testing.T) {
 			kubeClient:   cfg,
 		},
 		{
-			name:         "invalid namespace",
-			expectError:  true,
-			appNamespace: "DarkwingDuck",
-			appName:      uuid.New().String(),
-			chart:        ch,
-			valPath:      pwd + "/../../hack/ci/values.yaml",
-			kubeClient:   cfg,
-		},
-		{
 			name:         "missing values path",
 			expectError:  true,
 			appNamespace: uuid.New().String(),
@@ -224,8 +216,8 @@ func TestNewDeployment(t *testing.T) {
 				Chart:      tcase.chart,
 			}
 
-			_ = srv.CreateNamespace(tcase.appNamespace)
-			err = srv.newDeployment(tcase.appName, tcase.appNamespace, nil)
+			_ = srv.CreateNamespace(tcase.appName)
+			err = srv.newDeployment(tcase.appName, nil)
 
 			if tcase.expectError {
 				assert.NotNil(t, err)
@@ -277,6 +269,60 @@ func TestNewHelmClient(t *testing.T) {
 			_, err := srv.newHelmClient(tcase.appNamespace)
 
 			if tcase.expectError {
+				assert.NotNil(t, err)
+			} else {
+				assert.Nil(t, err)
+			}
+		})
+	}
+}
+
+func TestAttachRoleBinding(t *testing.T) {
+	type testCase struct {
+		name       string
+		namespace  string
+		kubeClient *rest.Config
+		expectErr  bool
+	}
+
+	env := envtest.Environment{}
+	cfg, err := env.Start()
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	testCases := []testCase{
+		{
+			name:       "valid rolebinding",
+			namespace:  "default",
+			kubeClient: cfg,
+			expectErr:  false,
+		},
+		{
+			name:       "invalid rolebinding",
+			namespace:  "thisThingDoesNotExist",
+			kubeClient: cfg,
+			expectErr:  true,
+		},
+	}
+
+	for _, tcase := range testCases {
+		t.Run(tcase.name, func(t *testing.T) {
+			srv := Server{
+				Context:    context.TODO(),
+				Logger:     zap.NewNop().Sugar(),
+				KubeClient: tcase.kubeClient,
+			}
+
+			cli, err := kubernetes.NewForConfig(tcase.kubeClient)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			err = attachRoleBinding(srv.Context, cli, tcase.namespace)
+
+			if tcase.expectErr {
 				assert.NotNil(t, err)
 			} else {
 				assert.Nil(t, err)
