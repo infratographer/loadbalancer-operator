@@ -42,7 +42,7 @@ func (s *Server) CreateNamespace(groupID string) (*v1.Namespace, error) {
 		},
 		ObjectMetaApplyConfiguration: &applymetav1.ObjectMetaApplyConfiguration{
 			Name:        &groupID,
-			Annotations: map[string]string{"load-balancer-operator-managed": "true"},
+			Annotations: map[string]string{"com.infratographer.lb-operator/managed": "true"},
 		},
 		Spec:   &applyv1.NamespaceSpecApplyConfiguration{},
 		Status: &applyv1.NamespaceStatusApplyConfiguration{},
