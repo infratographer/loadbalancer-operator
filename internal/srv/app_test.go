@@ -119,7 +119,7 @@ func TestCreateNamespace(t *testing.T) {
 				assert.Nil(t, ns)
 			} else {
 				assert.Nil(t, err)
-				assert.Contains(t, ns.Annotations, "load-balancer-operator-managed")
+				assert.Contains(t, ns.Annotations, "com.infratographer.lb-operator/managed")
 			}
 		})
 	}
