@@ -10,6 +10,7 @@ import (
 	"go.infratographer.com/x/pubsubx"
 
 	events "go.infratographer.com/loadbalanceroperator/pkg/events/v1alpha1"
+
 	"go.infratographer.com/x/urnx"
 )
 
