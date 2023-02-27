@@ -1,6 +1,7 @@
 package srv
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -18,13 +19,15 @@ var (
 	msg = pubsubx.Message{
 		SubjectURN: uuid.NewString(),
 		EventType:  "create",
-		Source:     "loadbalancerapi",
+		Source:     "lbapi",
 		Timestamp:  time.Now(),
 		ActorURN:   uuid.NewString(),
 	}
 )
 
-func TestParseLBData(t *testing.T) {
+func (suite *srvTestSuite) TestParseLBData() {
+	suite.T().Parallel()
+
 	type testCase struct {
 		name        string
 		data        map[string]interface{}
@@ -58,7 +61,7 @@ func TestParseLBData(t *testing.T) {
 	}
 
 	for _, tcase := range testCases {
-		t.Run(tcase.name, func(t *testing.T) {
+		suite.T().Run(tcase.name, func(t *testing.T) {
 			lbData := events.LoadBalancerData{}
 			srv := &Server{
 				Logger: zap.NewNop().Sugar(),
@@ -71,6 +74,51 @@ func TestParseLBData(t *testing.T) {
 			} else {
 				assert.Nil(t, err)
 				assert.NotNil(t, lbData)
+			}
+		})
+	}
+}
+
+func (suite *srvTestSuite) TestDeleteMessageHandler() {
+	suite.T().Parallel()
+
+	type testCase struct {
+		name        string
+		msg         pubsubx.Message
+		expectError bool
+	}
+
+	testCases := []testCase{
+		{
+			name:        "valid data",
+			expectError: false,
+			msg: pubsubx.Message{
+				SubjectURN: uuid.NewString(),
+				EventType:  "delete",
+				Source:     "lbapi",
+				Timestamp:  time.Now(),
+				ActorURN:   uuid.NewString(),
+				AdditionalData: map[string]interface{}{
+					"load_balancer_id": uuid.New(),
+					"location_id":      uuid.New(),
+				},
+			},
+		},
+	}
+
+	for _, tcase := range testCases {
+		suite.T().Run(tcase.name, func(t *testing.T) {
+			srv := &Server{
+				Context:    context.TODO(),
+				Logger:     zap.NewNop().Sugar(),
+				KubeClient: suite.Kubeconfig,
+			}
+			err := srv.deleteMessageHandler(&tcase.msg)
+
+			if tcase.expectError {
+				assert.NotNil(t, err)
+			} else {
+				assert.Nil(t, err)
 			}
 		})
 	}
