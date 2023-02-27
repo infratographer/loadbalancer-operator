@@ -47,9 +47,9 @@ func (s *Server) MessageHandler(m *nats.Msg) {
 func (s *Server) createMessageHandler(m *pubsubx.Message) error {
 	lbdata := events.LoadBalancerData{}
 
-	urn, err := urnx.Parse(m.SubjectURN)
+	lbURN, err := urnx.Parse(m.SubjectURN)
 	if err != nil {
-		s.Logger.Errorw("unable to parse URN", "error", err)
+		s.Logger.Errorw("unable to parse load-balancer URN", "error", err)
 		return err
 	}
 
@@ -58,7 +58,7 @@ func (s *Server) createMessageHandler(m *pubsubx.Message) error {
 		return err
 	}
 
-	if _, err := s.CreateNamespace(urn.ResourceID.String()); err != nil {
+	if _, err := s.CreateNamespace(lbURN.ResourceID.String()); err != nil {
 		s.Logger.Errorw("handler unable to create required namespace", "error", err)
 		return err
 	}
@@ -78,7 +78,7 @@ func (s *Server) createMessageHandler(m *pubsubx.Message) error {
 		})
 	}
 
-	if err := s.newDeployment(urn.ResourceID.String(), overrides); err != nil {
+	if err := s.newDeployment(lbURN.ResourceID.String(), overrides); err != nil {
 		s.Logger.Errorw("handler unable to create loadbalancer", "error", err)
 		return err
 	}
@@ -87,13 +87,13 @@ func (s *Server) createMessageHandler(m *pubsubx.Message) error {
 }
 
 func (s *Server) deleteMessageHandler(m *pubsubx.Message) error {
-	urn, err := urnx.Parse(m.SubjectURN)
+	lbURN, err := urnx.Parse(m.SubjectURN)
 	if err != nil {
-		s.Logger.Errorw("unable to parse URN", "error", err)
+		s.Logger.Errorw("unable to parse load-balancer URN", "error", err)
 		return err
 	}
 
-	if err := s.removeDeployment(urn.ResourceID.String()); err != nil {
+	if err := s.removeDeployment(lbURN.ResourceID.String()); err != nil {
 		s.Logger.Errorw("handler unable to delete loadbalancer", "error", err)
 		return err
 	}
