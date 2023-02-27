@@ -10,6 +10,7 @@ import (
 	"go.infratographer.com/x/pubsubx"
 
 	events "go.infratographer.com/loadbalanceroperator/pkg/events/v1alpha1"
+	"go.infratographer.com/x/urnx"
 )
 
 type valueSet struct {
@@ -30,13 +31,11 @@ func (s *Server) MessageHandler(m *nats.Msg) {
 			s.Logger.Errorw("unable to process create: %s", "error", err)
 		}
 	case events.EVENTUPDATE:
-		err := s.updateMessageHandler(&msg)
-		if err != nil {
+		if err := s.updateMessageHandler(&msg); err != nil {
 			s.Logger.Errorw("unable to process update", "error", err.Error())
 		}
 	case events.EVENTDELETE:
-		err := s.deleteMessageHandler(&msg)
-		if err != nil {
+		if err := s.deleteMessageHandler(&msg); err != nil {
 			s.Logger.Errorw("unable to process delete", "error", err.Error())
 		}
 	default:
@@ -47,12 +46,18 @@ func (s *Server) MessageHandler(m *nats.Msg) {
 func (s *Server) createMessageHandler(m *pubsubx.Message) error {
 	lbdata := events.LoadBalancerData{}
 
+	urn, err := urnx.Parse(m.SubjectURN)
+	if err != nil {
+		s.Logger.Errorw("unable to parse URN", "error", err)
+		return err
+	}
+
 	if err := s.parseLBData(&m.AdditionalData, &lbdata); err != nil {
 		s.Logger.Errorw("handler unable to parse loadbalancer data", "error", err)
 		return err
 	}
 
-	if _, err := s.CreateNamespace(lbdata.LoadBalancerID.String()); err != nil {
+	if _, err := s.CreateNamespace(urn.ResourceID.String()); err != nil {
 		s.Logger.Errorw("handler unable to create required namespace", "error", err)
 		return err
 	}
@@ -72,7 +77,7 @@ func (s *Server) createMessageHandler(m *pubsubx.Message) error {
 		})
 	}
 
-	if err := s.newDeployment(lbdata.LoadBalancerID.String(), overrides); err != nil {
+	if err := s.newDeployment(urn.ResourceID.String(), overrides); err != nil {
 		s.Logger.Errorw("handler unable to create loadbalancer", "error", err)
 		return err
 	}
@@ -81,14 +86,13 @@ func (s *Server) createMessageHandler(m *pubsubx.Message) error {
 }
 
 func (s *Server) deleteMessageHandler(m *pubsubx.Message) error {
-	lbdata := events.LoadBalancerData{}
-
-	if err := s.parseLBData(&m.AdditionalData, &lbdata); err != nil {
-		s.Logger.Errorw("handler unable to parse loadbalancer data", "error", err)
+	urn, err := urnx.Parse(m.SubjectURN)
+	if err != nil {
+		s.Logger.Errorw("unable to parse URN", "error", err)
 		return err
 	}
 
-	if err := s.removeDeployment(lbdata.LoadBalancerID.String()); err != nil {
+	if err := s.removeDeployment(urn.ResourceID.String()); err != nil {
 		s.Logger.Errorw("handler unable to delete loadbalancer", "error", err)
 		return err
 	}
