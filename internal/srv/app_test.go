@@ -19,8 +19,6 @@ import (
 )
 
 func (suite *srvTestSuite) TestNewHelmValues() {
-	// suite.T().Parallel()
-
 	type testCase struct {
 		name        string
 		valuesPath  string
@@ -77,8 +75,6 @@ func (suite *srvTestSuite) TestNewHelmValues() {
 }
 
 func (suite *srvTestSuite) TestCreateNamespace() {
-	// suite.T().Parallel()
-
 	type testCase struct {
 		name         string
 		appNamespace string
@@ -150,8 +146,6 @@ func (suite *srvTestSuite) TestCreateNamespace() {
 }
 
 func (suite *srvTestSuite) TestNewDeployment() {
-	// suite.T().Parallel()
-
 	type testCase struct {
 		name         string
 		appNamespace string
@@ -245,8 +239,6 @@ func (suite *srvTestSuite) TestNewDeployment() {
 }
 
 func (suite *srvTestSuite) TestNewHelmClient() {
-	// suite.T().Parallel()
-
 	type testCase struct {
 		name         string
 		appNamespace string
@@ -283,8 +275,6 @@ func (suite *srvTestSuite) TestNewHelmClient() {
 }
 
 func (suite *srvTestSuite) TestAttachRoleBinding() {
-	// suite.T().Parallel()
-
 	type testCase struct {
 		name       string
 		namespace  string
@@ -332,8 +322,6 @@ func (suite *srvTestSuite) TestAttachRoleBinding() {
 }
 
 func (suite *srvTestSuite) TestRemoveNamespace() {
-	// suite.T().Parallel()
-
 	type testCase struct {
 		name         string
 		appNamespace string
@@ -410,8 +398,6 @@ func (suite *srvTestSuite) TestRemoveNamespace() {
 }
 
 func (suite *srvTestSuite) TestRemoveDeployment() {
-	// suite.T().Parallel()
-
 	type testCase struct {
 		name         string
 		appNamespace string
