@@ -127,7 +127,7 @@ func (suite *srvTestSuite) TestDeleteMessageHandler() {
 			kubeclient:  suite.Kubeconfig,
 			valPath:     pwd + "/../../hack/ci/values.yaml",
 			msg: pubsubx.Message{
-				SubjectURN:     uuid.NewString(),
+				SubjectURN:     "urn:infratographer:load-balancer:" + uuid.NewString(),
 				EventType:      "delete",
 				Source:         "lbapi",
 				Timestamp:      time.Now(),
@@ -274,7 +274,7 @@ func (suite *srvTestSuite) TestCreateMessageHandler() {
 			valPath:     pwd + "/../../hack/ci/values.yaml",
 			kubeclient:  suite.Kubeconfig,
 			msg: pubsubx.Message{
-				SubjectURN: uuid.NewString(),
+				SubjectURN: "urn:infratographer:load-balancer:" + uuid.NewString(),
 				EventType:  "create",
 				Source:     "lbapi",
 				Timestamp:  time.Now(),
@@ -286,7 +286,15 @@ func (suite *srvTestSuite) TestCreateMessageHandler() {
 			},
 		},
 		{
-			name:        "valid overrides",
+			name: "valid overrides",
+			msg: pubsubx.Message{
+				SubjectURN:     "urn:infratographer:load-balancer:" + uuid.NewString(),
+				EventType:      "create",
+				Source:         "lbapi",
+				Timestamp:      time.Now(),
+				ActorURN:       uuid.NewString(),
+				AdditionalData: map[string]interface{}{},
+			},
 			expectError: false,
 			chart:       ch,
 			valPath:     pwd + "/../../hack/ci/values.yaml",
@@ -302,7 +310,7 @@ func (suite *srvTestSuite) TestCreateMessageHandler() {
 			chart:       ch,
 			valPath:     pwd + "/../../hack/ci/values.yaml",
 			msg: pubsubx.Message{
-				SubjectURN: uuid.NewString(),
+				SubjectURN: "urn:infratographer:load-balancer:" + uuid.NewString(),
 				EventType:  "create",
 				Source:     "lbapi",
 				Timestamp:  time.Now(),
@@ -342,7 +350,7 @@ func (suite *srvTestSuite) TestCreateMessageHandler() {
 			valPath:     "",
 			kubeclient:  suite.Kubeconfig,
 			msg: pubsubx.Message{
-				SubjectURN:     uuid.NewString(),
+				SubjectURN:     "urn:infratographer:load-balancer" + uuid.NewString(),
 				EventType:      "create",
 				Source:         "lbapi",
 				Timestamp:      time.Now(),
