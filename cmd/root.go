@@ -1,5 +1,5 @@
 /*
-Copyright © 2022 NAME HERE <EMAIL ADDRESS>
+Copyright © 2023 The Infratographer Authors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -67,6 +67,9 @@ func init() {
 
 	rootCmd.PersistentFlags().String("nats-subject-prefix", "", "prefix for NATS subjects")
 	viperBindFlag("nats.subject-prefix", rootCmd.PersistentFlags().Lookup("nats-subject-prefix"))
+
+	rootCmd.PersistentFlags().StringSlice("nats-subjects", nil, "NATS subjects to subscribe to")
+	viperBindFlag("nats.subjects", rootCmd.PersistentFlags().Lookup("nats-subjects"))
 
 	rootCmd.PersistentFlags().String("nats-stream-name", "loadbalanceroperator", "prefix for NATS subjects")
 	viperBindFlag("nats.stream-name", rootCmd.PersistentFlags().Lookup("nats-stream-name"))
