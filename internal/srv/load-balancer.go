@@ -29,39 +29,17 @@ func (s *Server) processLoadBalancer(msg pubsubx.Message) error {
 
 func (s *Server) processLoadBalancerCreate(msg pubsubx.Message) error {
 	// lbdata := events.LoadBalancerData{}
-
 	lbURN, err := urnx.Parse(msg.SubjectURN)
 	if err != nil {
 		s.Logger.Errorw("unable to parse load-balancer URN", "error", err)
 		return err
 	}
 
-	// if err := s.parseLBData(&msg.AdditionalData, &lbdata); err != nil {
-	// 	s.Logger.Errorw("handler unable to parse loadbalancer data", "error", err)
-	// 	return err
-	// }
-
 	if _, err := s.CreateNamespace(lbURN.ResourceID.String()); err != nil {
 		s.Logger.Errorw("handler unable to create required namespace", "error", err)
 		return err
 	}
 
-	// overrides := []valueSet{}
-	// for _, cpuFlag := range viper.GetStringSlice("helm-cpu-flag") {
-	// 	overrides = append(overrides, valueSet{
-	// 		helmKey: cpuFlag,
-	// 		value:   lbdata.Resources.CPU,
-	// 	})
-	// }
-
-	// for _, memFlag := range viper.GetStringSlice("helm-memory-flag") {
-	// 	overrides = append(overrides, valueSet{
-	// 		helmKey: memFlag,
-	// 		value:   lbdata.Resources.Memory,
-	// 	})
-	// }
-
-	// if err := s.newDeployment(lbURN.ResourceID.String(), overrides); err != nil {
 	if err := s.newDeployment(lbURN.ResourceID.String(), nil); err != nil {
 		s.Logger.Errorw("handler unable to create loadbalancer", "error", err)
 		return err
