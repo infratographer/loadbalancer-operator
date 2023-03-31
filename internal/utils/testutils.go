@@ -73,7 +73,6 @@ func (suite *OperatorTestSuite) TearDownAllSuite() {
 }
 
 func CreateWorkspace(dir string) (string, string, *chart.Chart, string) {
-
 	d, err := os.MkdirTemp("", dir)
 	if err != nil {
 		panic(err)
