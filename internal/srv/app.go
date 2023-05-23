@@ -261,7 +261,6 @@ func generateLBHelmValues(lb *loadBalancer) []string {
 	v := reflect.ValueOf(lb).Elem()
 	for i := 0; i < v.NumField(); i++ {
 		field := fmt.Sprintf("%s", v.Field(i))
-		// fmt.Println(base64.URLEncoding.WithPadding(base64.NoPadding).EncodeToString([]byte(field)))
 		val := fmt.Sprintf("%s.%s=%s", managedHelmKeyPrefix, v.Type().Field(i).Name, base64.URLEncoding.WithPadding(base64.NoPadding).EncodeToString([]byte(field)))
 		vals = append(vals, val)
 	}
