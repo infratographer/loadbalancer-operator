@@ -136,7 +136,6 @@ func (s *Server) newHelmValues(lb *loadBalancer) (map[string]interface{}, error)
 	additionalValues := generateLBHelmValues(lb)
 
 	for _, override := range additionalValues {
-		// or := base64.URLEncoding.EncodeToString([]byte(override))
 		if err := strvals.ParseInto(override, values); err != nil {
 			s.Logger.Errorw("unable to parse values", "error", err)
 			return nil, err
