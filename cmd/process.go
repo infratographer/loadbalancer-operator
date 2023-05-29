@@ -18,6 +18,8 @@ package cmd
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"os"
 	"os/signal"
 
@@ -27,14 +29,17 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
-	"github.com/nats-io/nats.go"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"go.infratographer.com/x/echox"
-	"go.infratographer.com/x/versionx"
+	"go.infratographer.com/loadbalancer-manager-haproxy/pkg/lbapi"
 
 	"go.infratographer.com/loadbalanceroperator/internal/srv"
+
+	"go.infratographer.com/x/echox"
+	"go.infratographer.com/x/events"
+	"go.infratographer.com/x/versionx"
+	"go.infratographer.com/x/viperx"
 )
 
 // processCmd represents the base command when called without any subcommands
@@ -52,10 +57,30 @@ var (
 )
 
 func init() {
-	rootCmd.AddCommand(processCmd)
-
 	// only available as a CLI arg because it shouldn't be something that could accidentially end up in a config file or env var
 	processCmd.Flags().BoolVar(&processDevMode, "dev", false, "dev mode: disables all auth checks, pretty logging, etc.")
+
+	processCmd.PersistentFlags().String("api-endpoint", "http://localhost:7608", "endpoint for load balancer API")
+	viperx.MustBindFlag(viper.GetViper(), "api-endpoint", processCmd.PersistentFlags().Lookup("api-endpoint"))
+
+	processCmd.PersistentFlags().String("chart-path", "", "path that contains deployment chart")
+	viperx.MustBindFlag(viper.GetViper(), "chart-path", processCmd.PersistentFlags().Lookup("chart-path"))
+
+	processCmd.PersistentFlags().String("chart-values-path", "", "path that contains values file to configure deployment chart")
+	viperx.MustBindFlag(viper.GetViper(), "chart-values-path", processCmd.PersistentFlags().Lookup("chart-values-path"))
+
+	processCmd.PersistentFlags().StringSlice("event-locations", nil, "location id(s) to filter events for")
+	viperx.MustBindFlag(viper.GetViper(), "event-locations", processCmd.PersistentFlags().Lookup("event-locations"))
+
+	processCmd.PersistentFlags().StringSlice("event-topics", nil, "event topics to subscribe to")
+	viperx.MustBindFlag(viper.GetViper(), "event-topics", processCmd.PersistentFlags().Lookup("event-topics"))
+
+	processCmd.PersistentFlags().String("kube-config-path", "", "path to a valid kubeconfig file")
+	viperx.MustBindFlag(viper.GetViper(), "kube-config-path", processCmd.PersistentFlags().Lookup("kube-config-path"))
+
+	events.MustViperFlagsForSubscriber(viper.GetViper(), processCmd.Flags())
+
+	rootCmd.AddCommand(processCmd)
 }
 
 func process(ctx context.Context, logger *zap.SugaredLogger) error {
@@ -63,16 +88,13 @@ func process(ctx context.Context, logger *zap.SugaredLogger) error {
 		return err
 	}
 
+	cfg := events.SubscriberConfigFromViper(viper.GetViper())
+	cfg.WithNATS(viper.GetViper())
+
 	client, err := newKubeAuth(viper.GetString("kube-config-path"))
 	if err != nil {
 		logger.Fatalw("failed to create Kubernetes client", "error", err)
-
-		return err
-	}
-
-	js, err := newJetstreamConnection()
-	if err != nil {
-		logger.Fatalw("failed to create NATS jetstream connection", "error", err)
+		err = errors.Join(err, errInvalidKubeClient)
 
 		return err
 	}
@@ -80,7 +102,6 @@ func process(ctx context.Context, logger *zap.SugaredLogger) error {
 	chart, err := loadHelmChart(viper.GetString("chart-path"))
 	if err != nil {
 		logger.Fatalw("failed to load helm chart from provided path", "error", err)
-
 		return err
 	}
 
@@ -96,19 +117,20 @@ func process(ctx context.Context, logger *zap.SugaredLogger) error {
 	}
 
 	server := &srv.Server{
-		Echo:            eSrv,
-		Chart:           chart,
-		Context:         cx,
-		Debug:           viper.GetBool("logging.debug"),
-		JetstreamClient: js,
-		KubeClient:      client,
-		Logger:          logger,
-		Prefix:          viper.GetString("nats.subject-prefix"),
-		Subjects:        viper.GetStringSlice("nats.subjects"),
-		StreamName:      viper.GetString("nats.stream-name"),
-		ValuesPath:      viper.GetString("chart-values-path"),
-		Locations:       viper.GetStringSlice("locations"),
+		APIClient:        lbapi.NewClient(viper.GetString("api-endpoint")),
+		Echo:             eSrv,
+		Chart:            chart,
+		Context:          cx,
+		Debug:            viper.GetBool("logging.debug"),
+		KubeClient:       client,
+		Logger:           logger,
+		Topics:           viper.GetStringSlice("event-topics"),
+		SubscriberConfig: cfg,
+		ValuesPath:       viper.GetString("chart-values-path"),
+		Locations:        viper.GetStringSlice("event-locations"),
 	}
+
+	fmt.Println(server.Topics)
 
 	if err := server.Run(cx); err != nil {
 		logger.Fatalw("failed starting server", "error", err)
@@ -126,35 +148,17 @@ func process(ctx context.Context, logger *zap.SugaredLogger) error {
 	return nil
 }
 
-func newJetstreamConnection() (nats.JetStreamContext, error) {
-	opts := []nats.Option{}
-
-	if !processDevMode && viper.GetString("nats.creds-file") != "" {
-		opts = append(opts, nats.UserCredentials(viper.GetString("nats.creds-file")))
-	}
-
-	nc, err := nats.Connect(viper.GetString("nats.url"), opts...)
-	if err != nil {
-		return nil, err
-	}
-
-	js, err := nc.JetStream()
-	if err != nil {
-		return nil, err
-	}
-
-	return js, nil
-}
-
 func newKubeAuth(path string) (*rest.Config, error) {
 	config, err := rest.InClusterConfig()
 	if err != nil {
 		if path != "" {
 			config, err = clientcmd.BuildConfigFromFlags("", path)
 			if err != nil {
+				err = errors.Join(err, errInvalidKubeClient)
 				return nil, err
 			}
 		} else {
+			err = errors.Join(err, errInvalidKubeClient)
 			return nil, err
 		}
 	}
@@ -163,12 +167,12 @@ func newKubeAuth(path string) (*rest.Config, error) {
 }
 
 func validateFlags() error {
-	if viper.GetString("nats.subject-prefix") == "" {
-		return ErrNATSSubjectPrefix
+	if viper.GetString("chart-path") == "" {
+		return errChartPath
 	}
 
-	if viper.GetString("chart-path") == "" {
-		return ErrChartPath
+	if len(viper.GetStringSlice("event-topics")) < 1 {
+		return errRequiredTopics
 	}
 
 	return nil
@@ -177,7 +181,9 @@ func validateFlags() error {
 func loadHelmChart(chartPath string) (*chart.Chart, error) {
 	chart, err := loader.Load(chartPath)
 	if err != nil {
-		// logger.Errorw("failed to load helm chart", "error", err)
+		logger.Errorw("failed to load helm chart", "error", err)
+		err = errors.Join(err, errInvalidHelmChart)
+
 		return nil, err
 	}
 
