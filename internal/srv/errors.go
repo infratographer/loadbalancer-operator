@@ -10,4 +10,7 @@ var (
 	errSubscriberCreate        = errors.New("unable to create subscriber")
 	errSubscriptionCreate      = errors.New("unable to subscribe to topic")
 	errInvalidHelmClient       = errors.New("unable to create helm client")
+	errInvalidNamespace        = errors.New("unable to create namespace")
+	errInvalidRoleBinding      = errors.New("unable to create namespace role binding")
+	errInvalidHelmValues       = errors.New("unable to create helm values")
 )

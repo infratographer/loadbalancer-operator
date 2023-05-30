@@ -38,9 +38,9 @@ func (s *Server) newHelmClient(namespace string) (*action.Configuration, error) 
 	wrapper := func(*rest.Config) *rest.Config { return s.KubeClient }
 	cliopt.WithWrapConfigFn(wrapper)
 
-	err := config.Init(cliopt, namespace, "secret", s.Logger.Infof)
+	err := config.Init(cliopt, namespace, "secret", s.Logger.Debugf)
 	if err != nil || namespace == "" {
-		s.Logger.Errorw("unable to initialize helm client", "error", err, "namespace", namespace)
+		s.Logger.Debugw("unable to initialize helm client", "error", err, "namespace", namespace)
 		err = errors.Join(err, errInvalidHelmClient)
 
 		return nil, err
@@ -60,8 +60,8 @@ func (s *Server) newHelmValues(lb *loadBalancer) (map[string]interface{}, error)
 
 	values, err := opts.MergeValues(provider)
 	if err != nil {
-		s.Logger.Errorw("unable to load values data", "error", err)
-		return nil, err
+		s.Logger.Debugw("unable to load values data", "error", err, "loadBalancer", lb.loadBalancerID.String())
+		return nil, errors.Join(err, errInvalidHelmValues)
 	}
 
 	return values, nil

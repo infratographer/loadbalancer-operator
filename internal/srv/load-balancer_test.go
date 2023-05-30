@@ -156,9 +156,10 @@ func (s srvTestSuite) TestNewLoadBalancer() { //nolint:govet
 				Context:   context.TODO(),
 			}
 
-			lb := srv.newLoadBalancer(tc.subj, tc.adds)
+			lb, err := srv.newLoadBalancer(tc.subj, tc.adds)
 
 			assert.Equal(t, lb.lbType, tc.lbType)
+			assert.Nil(t, err)
 
 			if tc.lbType != typeNoLB {
 				assert.NotNil(t, lb.lbData)
@@ -178,6 +179,7 @@ func (s srvTestSuite) TestNewLoadBalancer_InvalidAPI() { //nolint:govet
 		Context:   context.TODO(),
 	}
 
-	lb := srv.newLoadBalancer(dummyLB, []gidx.PrefixedID{})
+	lb, err := srv.newLoadBalancer(dummyLB, []gidx.PrefixedID{})
 	assert.Nil(s.T(), lb)
+	assert.NotNil(s.T(), err)
 }

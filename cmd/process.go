@@ -19,7 +19,6 @@ package cmd
 import (
 	"context"
 	"errors"
-	"fmt"
 	"os"
 	"os/signal"
 
@@ -33,13 +32,12 @@ import (
 	"github.com/spf13/viper"
 
 	"go.infratographer.com/loadbalancer-manager-haproxy/pkg/lbapi"
-
-	"go.infratographer.com/loadbalanceroperator/internal/srv"
-
 	"go.infratographer.com/x/echox"
 	"go.infratographer.com/x/events"
 	"go.infratographer.com/x/versionx"
 	"go.infratographer.com/x/viperx"
+
+	"go.infratographer.com/loadbalanceroperator/internal/srv"
 )
 
 // processCmd represents the base command when called without any subcommands
@@ -130,8 +128,6 @@ func process(ctx context.Context, logger *zap.SugaredLogger) error {
 		Locations:        viper.GetStringSlice("event-locations"),
 	}
 
-	fmt.Println(server.Topics)
-
 	if err := server.Run(cx); err != nil {
 		logger.Fatalw("failed starting server", "error", err)
 		cancel()
@@ -154,12 +150,10 @@ func newKubeAuth(path string) (*rest.Config, error) {
 		if path != "" {
 			config, err = clientcmd.BuildConfigFromFlags("", path)
 			if err != nil {
-				err = errors.Join(err, errInvalidKubeClient)
-				return nil, err
+				return nil, errors.Join(err, errInvalidKubeClient)
 			}
 		} else {
-			err = errors.Join(err, errInvalidKubeClient)
-			return nil, err
+			return nil, errors.Join(err, errInvalidKubeClient)
 		}
 	}
 
@@ -182,9 +176,8 @@ func loadHelmChart(chartPath string) (*chart.Chart, error) {
 	chart, err := loader.Load(chartPath)
 	if err != nil {
 		logger.Errorw("failed to load helm chart", "error", err)
-		err = errors.Join(err, errInvalidHelmChart)
 
-		return nil, err
+		return nil, errors.Join(err, errInvalidHelmChart)
 	}
 
 	return chart, nil

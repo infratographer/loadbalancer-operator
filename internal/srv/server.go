@@ -64,13 +64,13 @@ func (s *Server) configureSubscribers() error {
 	for _, topic := range s.Topics {
 		s.Logger.Debugw("subscribing to topic", "topic", topic)
 
-		sub, err := events.NewSubscriber(s.SubscriberConfig)
+		csub, err := events.NewSubscriber(s.SubscriberConfig)
 		if err != nil {
-			s.Logger.Errorw("unable to create subscriber", "error", err, "topic", topic)
+			s.Logger.Errorw("unable to create change subscriber", "error", err, "topic", topic)
 			return errSubscriberCreate
 		}
 
-		c, err := sub.SubscribeChanges(s.Context, topic)
+		c, err := csub.SubscribeChanges(s.Context, topic)
 		if err != nil {
 			s.Logger.Errorw("unable to subscribe to change topic", "error", err, "topic", topic, "type", "change")
 			return errSubscriptionCreate
@@ -78,7 +78,13 @@ func (s *Server) configureSubscribers() error {
 
 		ch = append(ch, c)
 
-		e, err := sub.SubscribeEvents(s.Context, topic)
+		esub, err := events.NewSubscriber(s.SubscriberConfig)
+		if err != nil {
+			s.Logger.Errorw("unable to create event subscriber", "error", err, "topic", topic)
+			return errSubscriberCreate
+		}
+
+		e, err := esub.SubscribeEvents(s.Context, topic)
 		if err != nil {
 			s.Logger.Errorw("unable to subscribe to event topic", "error", err, "topic", topic, "type", "event")
 			return errSubscriptionCreate

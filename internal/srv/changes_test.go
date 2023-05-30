@@ -79,9 +79,11 @@ func (suite srvTestSuite) TestProcessLoadBalancerChangeCreate() { //nolint:govet
 			s.KubeClient = tc.cfg
 			s.Chart = tc.chart
 
-			lb := s.newLoadBalancer(tc.msg.SubjectID, tc.msg.AdditionalSubjectIDs)
+			lb, err := s.newLoadBalancer(tc.msg.SubjectID, tc.msg.AdditionalSubjectIDs)
 
-			err := s.processLoadBalancerChangeCreate(lb)
+			assert.Nil(suite.T(), err)
+
+			err = s.processLoadBalancerChangeCreate(lb)
 
 			if len(tc.expectedErrors) > 0 {
 				assert.Error(suite.T(), err)
@@ -156,14 +158,16 @@ func (suite srvTestSuite) TestProcessLoadBalancerDelete() { //nolint:govet
 			s.KubeClient = tc.cfg
 			s.Chart = tc.chart
 
-			lb := s.newLoadBalancer(tc.msg.SubjectID, tc.msg.AdditionalSubjectIDs)
+			lb, err := s.newLoadBalancer(tc.msg.SubjectID, tc.msg.AdditionalSubjectIDs)
+
+			assert.Nil(suite.T(), err)
 
 			_ = s.processLoadBalancerChangeCreate(lb)
 
 			// TODO: check if the namespace was created
 			// TODO: check if helm release exists
 
-			err := s.processLoadBalancerChangeDelete(lb)
+			err = s.processLoadBalancerChangeDelete(lb)
 
 			if tc.expectError {
 				assert.Error(suite.T(), err)

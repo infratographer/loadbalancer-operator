@@ -4,8 +4,7 @@ import (
 	"go.infratographer.com/x/gidx"
 )
 
-// TODO: this should return an error as well in case the loadbalancer call fails
-func (s *Server) newLoadBalancer(subj gidx.PrefixedID, adds []gidx.PrefixedID) *loadBalancer {
+func (s *Server) newLoadBalancer(subj gidx.PrefixedID, adds []gidx.PrefixedID) (*loadBalancer, error) {
 	l := new(loadBalancer)
 	l.isLoadBalancer(subj, adds)
 
@@ -13,13 +12,13 @@ func (s *Server) newLoadBalancer(subj gidx.PrefixedID, adds []gidx.PrefixedID) *
 		data, err := s.APIClient.GetLoadBalancer(s.Context, l.loadBalancerID.String())
 		if err != nil {
 			s.Logger.Errorw("unable to get loadbalancer from API", "error", err)
-			return nil
+			return nil, err
 		}
 
 		l.lbData = data
 	}
 
-	return l
+	return l, nil
 }
 
 func (l *loadBalancer) isLoadBalancer(subj gidx.PrefixedID, adds []gidx.PrefixedID) {

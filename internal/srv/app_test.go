@@ -149,7 +149,9 @@ func (suite *srvTestSuite) TestCreateNamespace() {
 			subj := tcase.id
 			adds := []gidx.PrefixedID{}
 
-			lb := srv.newLoadBalancer(subj, adds)
+			lb, err := srv.newLoadBalancer(subj, adds)
+
+			assert.Nil(t, err)
 
 			hash := hashLBName(lb.loadBalancerID.String())
 			ns, err := srv.CreateNamespace(hash)
@@ -229,7 +231,9 @@ func (suite *srvTestSuite) TestRemoveNamespace() {
 				KubeClient: tcase.kubeclient,
 			}
 
-			lb := srv.newLoadBalancer(tcase.id, []gidx.PrefixedID{})
+			lb, err := srv.newLoadBalancer(tcase.id, []gidx.PrefixedID{})
+
+			assert.Nil(t, err)
 
 			hash := hashLBName(lb.loadBalancerID.String())
 
@@ -239,7 +243,7 @@ func (suite *srvTestSuite) TestRemoveNamespace() {
 
 			// TODO: check that namespace does exist
 
-			err := srv.removeNamespace(hash)
+			err = srv.removeNamespace(hash)
 
 			// TODO: check that namespace does not exist
 
@@ -340,7 +344,9 @@ func (suite *srvTestSuite) TestNewDeployment() {
 				Chart:      tcase.chart,
 			}
 
-			lb := srv.newLoadBalancer(tcase.id, []gidx.PrefixedID{})
+			lb, err := srv.newLoadBalancer(tcase.id, []gidx.PrefixedID{})
+
+			assert.Nil(t, err)
 
 			hash := hashLBName(lb.loadBalancerID.String())
 
@@ -423,7 +429,9 @@ func (suite *srvTestSuite) TestRemoveDeployment() {
 				Chart:      tcase.chart,
 			}
 
-			lb := srv.newLoadBalancer(tcase.id, []gidx.PrefixedID{})
+			lb, err := srv.newLoadBalancer(tcase.id, []gidx.PrefixedID{})
+
+			assert.Nil(t, err)
 
 			hash := hashLBName(lb.loadBalancerID.String())
 

@@ -115,11 +115,3 @@ func setupLogging() {
 	logger = l.Sugar().With("app", "loadbalanceroperator")
 	defer logger.Sync() //nolint:errcheck
 }
-
-// viperBindFlag provides a wrapper around the viper bindings that handles error checks
-// func viperBindFlag(name string, flag *pflag.Flag) {
-// 	err := viper.BindPFlag(name, flag)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// }

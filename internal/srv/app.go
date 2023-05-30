@@ -3,6 +3,7 @@ package srv
 import (
 	"context"
 	"encoding/hex"
+	"errors"
 	"fmt"
 
 	"helm.sh/helm/v3/pkg/action"
@@ -39,16 +40,16 @@ func (s *Server) removeNamespace(ns string) error {
 // CreateNamespace creates namespaces for the specified group that is
 // provided in the event received
 func (s *Server) CreateNamespace(hash string) (*v1.Namespace, error) {
-	s.Logger.Debugf("ensuring namespace %s exists", hash)
+	s.Logger.Debugw("ensuring namespace exists", "namespace", hash)
 
 	if !checkNameLength(hash, kubeNSLength) {
+		s.Logger.Debugw("namespace name is empty or too long", "namespace", hash, "limit", kubeNSLength)
 		return nil, errInvalidObjectNameLength
 	}
 
 	kc, err := kubernetes.NewForConfig(s.KubeClient)
-
 	if err != nil {
-		s.Logger.Errorw("unable to authenticate against kubernetes cluster", "error", err)
+		s.Logger.Debugw("unable to authenticate against kubernetes cluster", "error", err)
 		return nil, err
 	}
 
@@ -65,16 +66,16 @@ func (s *Server) CreateNamespace(hash string) (*v1.Namespace, error) {
 		Spec:   &applyv1.NamespaceSpecApplyConfiguration{},
 		Status: &applyv1.NamespaceStatusApplyConfiguration{},
 	}
-	ns, err := kc.CoreV1().Namespaces().Apply(s.Context, &apSpec, metav1.ApplyOptions{FieldManager: "loadbalanceroperator"})
 
+	ns, err := kc.CoreV1().Namespaces().Apply(s.Context, &apSpec, metav1.ApplyOptions{FieldManager: "loadbalanceroperator"})
 	if err != nil {
-		s.Logger.Errorw("unable to create namespace", "error", err)
-		return nil, err
+		s.Logger.Debugw("unable to create namespace", "error", err, "namespace", hash)
+		return nil, errors.Join(err, errInvalidNamespace)
 	}
 
 	if err := attachRoleBinding(s.Context, kc, hash); err != nil {
-		s.Logger.Errorw("unable to attach namespace manager rolebinding to namespace", "error", err)
-		return nil, err
+		s.Logger.Debugw("unable to attach namespace manager rolebinding to namespace", "error", err)
+		return nil, errors.Join(err, errInvalidRoleBinding)
 	}
 
 	return ns, nil
@@ -114,25 +115,24 @@ func (s *Server) newDeployment(lb *loadBalancer) error {
 	hash := hashLBName(lb.loadBalancerID.String())
 
 	if _, err := s.CreateNamespace(hash); err != nil {
-		s.Logger.Errorw("unable to create namespace", "error", err)
+		s.Logger.Debugw("unable to create namespace", "error", err, "namespace", hash)
 		return err
 	}
 
 	releaseName := fmt.Sprintf("lb-%s", hash)
 	if !checkNameLength(releaseName, helmReleaseLength) {
-		// if len(releaseName) > nameLength {
 		releaseName = releaseName[0:helmReleaseLength]
 	}
 
 	values, err := s.newHelmValues(lb)
 	if err != nil {
-		s.Logger.Errorw("unable to prepare chart values", "error", err)
+		s.Logger.Debugw("unable to prepare chart values", "error", err, "loadBalancer", lb.loadBalancerID.String(), "namespace", hash)
 		return err
 	}
 
 	client, err := s.newHelmClient(hash)
 	if err != nil {
-		s.Logger.Errorln("unable to initialize helm client: %s", err)
+		s.Logger.Debugw("unable to initialize helm client", "err", err, "loadBalancer", lb.loadBalancerID.String(), "namespace", hash)
 		return err
 	}
 
@@ -155,14 +155,13 @@ func (s *Server) removeDeployment(lb *loadBalancer) error {
 	hash := hashLBName(lb.loadBalancerID.String())
 
 	releaseName := fmt.Sprintf("lb-%s", hash)
-
 	if !checkNameLength(releaseName, helmReleaseLength) {
 		releaseName = releaseName[0:helmReleaseLength]
 	}
 
 	client, err := s.newHelmClient(hash)
 	if err != nil {
-		s.Logger.Errorw("unable to initialize helm client", "error", err, "namespace", hash, "releaseName", releaseName, "loadBalancer", lb.loadBalancerID.String())
+		s.Logger.Debugw("unable to initialize helm client", "error", err, "loadBalancer", lb.loadBalancerID.String(), "namespace", hash, "releaseName", releaseName)
 		return err
 	}
 
