@@ -5,7 +5,7 @@ go 1.20
 replace (
 	github.com/docker/cli => github.com/docker/cli v20.10.19+incompatible
 	github.com/docker/docker => github.com/docker/docker v20.10.19+incompatible
-	go.infratographer.com/x => /Users/tyler/go/src/github.com/infratographer/x
+	github.com/infratographer/x => github.com/tylerauerbeck/x v0.0.0-20230529202039-d199733dbbad
 	oras.land/oras-go => oras.land/oras-go v1.2.2
 )
 
@@ -165,7 +165,10 @@ require (
 	sigs.k8s.io/controller-runtime v0.14.5
 )
 
-require github.com/shurcooL/graphql v0.0.0-20220606043923-3cf50f8a0a29 // indirect
+require (
+	github.com/shurcooL/graphql v0.0.0-20220606043923-3cf50f8a0a29 // indirect
+	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
+)
 
 require (
 	github.com/AdaLogics/go-fuzz-headers v0.0.0-20230106234847-43070de90fa1 // indirect
