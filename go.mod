@@ -6,7 +6,7 @@ require (
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/google/uuid v1.3.0
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/nats-io/nats.go v1.24.0
+	github.com/nats-io/nats.go v1.26.0
 	github.com/spf13/cobra v1.7.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.15.0
@@ -71,7 +71,7 @@ require (
 	github.com/jmoiron/sqlx v1.3.5 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/klauspost/compress v1.16.4 // indirect
+	github.com/klauspost/compress v1.16.5 // indirect
 	github.com/lann/builder v0.0.0-20180802200727-47ae307949d0 // indirect
 	github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 // indirect
 	github.com/lib/pq v1.10.9 // indirect
