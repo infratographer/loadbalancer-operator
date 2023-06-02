@@ -37,6 +37,7 @@ import (
 	"go.infratographer.com/x/versionx"
 	"go.infratographer.com/x/viperx"
 
+	"go.infratographer.com/loadbalanceroperator/internal/config"
 	"go.infratographer.com/loadbalanceroperator/internal/srv"
 )
 
@@ -86,8 +87,8 @@ func process(ctx context.Context, logger *zap.SugaredLogger) error {
 		return err
 	}
 
-	cfg := events.SubscriberConfigFromViper(viper.GetViper())
-	cfg.WithNATS(viper.GetViper())
+	// cfg := events.SubscriberConfigFromViper(viper.GetViper())
+	// cfg.WithNATS(viper.GetViper())
 
 	client, err := newKubeAuth(viper.GetString("kube-config-path"))
 	if err != nil {
@@ -123,7 +124,7 @@ func process(ctx context.Context, logger *zap.SugaredLogger) error {
 		KubeClient:       client,
 		Logger:           logger,
 		Topics:           viper.GetStringSlice("event-topics"),
-		SubscriberConfig: cfg,
+		SubscriberConfig: config.AppConfig.Events.Subscriber,
 		ValuesPath:       viper.GetString("chart-values-path"),
 		Locations:        viper.GetStringSlice("event-locations"),
 	}

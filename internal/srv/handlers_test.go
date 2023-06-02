@@ -14,6 +14,7 @@ import (
 	"go.infratographer.com/x/echox"
 	"go.infratographer.com/x/events"
 	"go.infratographer.com/x/gidx"
+
 	"go.uber.org/zap"
 	"helm.sh/helm/v3/pkg/chart/loader"
 )
@@ -170,7 +171,7 @@ func (s srvTestSuite) TestProcessEvent() { //nolint:govet
 	pub := s.PubConfig
 	p, _ := events.NewPublisher(pub)
 	_ = p.PublishEvent(context.TODO(), "load-balancer-event", events.EventMessage{
-		EventType:            string(events.CreateEventType),
+		EventType:            "create",
 		SubjectID:            id,
 		AdditionalSubjectIDs: []gidx.PrefixedID{loc},
 	})
@@ -180,13 +181,13 @@ func (s srvTestSuite) TestProcessEvent() { //nolint:govet
 	go srv.processEvent(srv.eventChannels[0])
 
 	_ = p.PublishEvent(context.TODO(), "load-balancer-event", events.EventMessage{
-		EventType:            string(events.UpdateChangeType),
+		EventType:            "update",
 		AdditionalSubjectIDs: []gidx.PrefixedID{loc},
 		SubjectID:            id,
 	})
 
 	_ = p.PublishEvent(context.TODO(), "load-balancer-event", events.EventMessage{
-		EventType:            string(events.DeleteChangeType),
+		EventType:            "delete",
 		AdditionalSubjectIDs: []gidx.PrefixedID{loc},
 		SubjectID:            id,
 	})

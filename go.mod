@@ -5,7 +5,7 @@ go 1.20
 replace (
 	github.com/docker/cli => github.com/docker/cli v20.10.19+incompatible
 	github.com/docker/docker => github.com/docker/docker v20.10.19+incompatible
-	github.com/infratographer/x => github.com/tylerauerbeck/x v0.0.0-20230529202039-d199733dbbad
+	go.infratographer.com/x => github.com/tylerauerbeck/x v0.0.0-20230602185501-09211fd06b3e
 	oras.land/oras-go => oras.land/oras-go v1.2.2
 )
 
@@ -17,7 +17,7 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.15.0
 	github.com/stretchr/testify v1.8.3
-	go.infratographer.com/x v0.1.3
+	go.infratographer.com/x v0.3.0
 	go.uber.org/zap v1.24.0
 	helm.sh/helm/v3 v3.11.3
 	k8s.io/apimachinery v0.27.1
@@ -166,7 +166,17 @@ require (
 )
 
 require (
+	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.14.0 // indirect
 	github.com/shurcooL/graphql v0.0.0-20220606043923-3cf50f8a0a29 // indirect
+	go.opentelemetry.io/otel/exporters/jaeger v1.16.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/internal/retry v1.16.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.16.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.16.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.16.0 // indirect
+	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.16.0 // indirect
+	go.opentelemetry.io/otel/sdk v1.16.0 // indirect
+	go.opentelemetry.io/proto/otlp v0.19.0 // indirect
 	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
 )
 
