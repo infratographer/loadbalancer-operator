@@ -8,6 +8,9 @@ import (
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
+	"go.infratographer.com/loadbalanceroperator/internal/config"
+	"go.infratographer.com/x/echojwtx"
+	"go.infratographer.com/x/events"
 	"go.infratographer.com/x/viperx"
 	"go.uber.org/zap"
 
@@ -46,6 +49,9 @@ func init() {
 	rootCmd.PersistentFlags().String("healthcheck-port", ":8080", "port to run healthcheck probe on")
 	viperx.MustBindFlag(viper.GetViper(), "healthcheck-port", rootCmd.PersistentFlags().Lookup("healthcheck-port"))
 
+	events.MustViperFlagsForSubscriber(viper.GetViper(), processCmd.Flags())
+	echojwtx.MustViperFlags(viper.GetViper(), processCmd.Flags())
+
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
@@ -70,6 +76,8 @@ func initConfig() {
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_", "-", "_"))
 	viper.SetEnvPrefix("loadbalanceroperator")
 	viper.AutomaticEnv() // read in environment variables that match
+
+	setupAppConfig()
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
@@ -98,4 +106,15 @@ func setupLogging() {
 
 	logger = l.Sugar().With("app", "loadbalanceroperator")
 	defer logger.Sync() //nolint:errcheck
+}
+
+// setupAppConfig loads our config.AppConfig struct with the values bound by
+// viper. Then, anywhere we need these values, we can just return to AppConfig
+// instead of performing viper.GetString(...), viper.GetBool(...), etc.
+func setupAppConfig() {
+	err := viper.Unmarshal(&config.AppConfig)
+	if err != nil {
+		fmt.Printf("unable to decode app config: %s", err)
+		os.Exit(1)
+	}
 }

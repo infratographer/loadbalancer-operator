@@ -17,7 +17,6 @@ import (
 
 	"go.infratographer.com/loadbalancer-manager-haproxy/pkg/lbapi"
 	"go.infratographer.com/x/echox"
-	"go.infratographer.com/x/events"
 	"go.infratographer.com/x/versionx"
 	"go.infratographer.com/x/viperx"
 
@@ -61,8 +60,6 @@ func init() {
 	processCmd.PersistentFlags().String("kube-config-path", "", "path to a valid kubeconfig file")
 	viperx.MustBindFlag(viper.GetViper(), "kube-config-path", processCmd.PersistentFlags().Lookup("kube-config-path"))
 
-	events.MustViperFlagsForSubscriber(viper.GetViper(), processCmd.Flags())
-
 	rootCmd.AddCommand(processCmd)
 }
 
@@ -70,9 +67,6 @@ func process(ctx context.Context, logger *zap.SugaredLogger) error {
 	if err := validateFlags(); err != nil {
 		return err
 	}
-
-	// cfg := events.SubscriberConfigFromViper(viper.GetViper())
-	// cfg.WithNATS(viper.GetViper())
 
 	client, err := newKubeAuth(viper.GetString("kube-config-path"))
 	if err != nil {
