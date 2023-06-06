@@ -43,13 +43,13 @@ spec:
           {{- if .Values.operator.extraEnvVars }}
           env:
           {{- range .Values.operator.extraEnvVars }}
-            name: {{ .name }}
-            value: {{ .value }}
+            - name: {{ .name }}
+              value: {{ .value }}
           {{- end }}
           {{- end }}
           envFrom:
-          - configMapRef:
-              name: {{ include "common.names.fullname" . }}-config
+            - configMapRef:
+                name: {{ include "common.names.fullname" . }}-config
           {{- if .Values.operator.securityContext }}
           securityContext:
             {{- toYaml .Values.operator.securityContext | nindent 12 }}

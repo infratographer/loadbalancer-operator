@@ -27,8 +27,8 @@ operator:
   extraLabels: []
   extraAnnotations: [] 
   extraEnvVars: []
-#    - name: thing
-#      value: otherthing 
+#    - name: LOADBALANCEROPERATOR_EVENTS_SUBSCRIBER_NATS_CREDSFILE
+#      value: "/creds"
   resources: {}
   podSecurityContext: {}
   securityContext: {}
