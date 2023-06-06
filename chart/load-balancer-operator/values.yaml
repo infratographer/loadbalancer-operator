@@ -24,8 +24,8 @@ service:
 operator:
   healthCheckPort: "8080"
   replicas: 1
-  extraLabels: {}
-  extraAnnotations: {}
+  extraLabels: []
+  extraAnnotations: [] 
   extraEnvVars: []
 #    - name: thing
 #      value: otherthing 
@@ -39,9 +39,6 @@ operator:
       audience: ""
       issuer: ""
   chart:
-    configMapName: "lb-chart"
-    chartPath: "/chart.tgz"
-    valuesPath: "/events-creds"
     chartValues: ""
     chartBinaryData: ""
   events:

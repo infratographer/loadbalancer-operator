@@ -49,7 +49,7 @@ spec:
           {{- end }}
           envFrom:
           - configMapRef:
-              name: operator-config
+              name: {{ include "common.names.fullname" . }}-config
           {{- if .Values.operator.securityContext }}
           securityContext:
             {{- toYaml .Values.operator.securityContext | nindent 12 }}
@@ -76,11 +76,9 @@ spec:
             - name: chart-config
               mountPath: /chart.tgz
               subPath: chart.tgz
-            {{- if ne .Values.operator.chart.valuesPathKey "" }}
             - name: chart-config
               mountPath: /lb-values.yaml
               subPath: values.yaml
-            {{- end }}
             {{- if .Values.operator.events.auth.secretName  }}
             - name: events-creds
               mountPath: /creds
@@ -108,6 +106,6 @@ spec:
         {{- end }}
         - name: chart-config
           configMap:
-            name: "{{ .Values.operator.chart.configMapName }}"
+            name: "{{ include "common.names.fullname" . }}-lb-chart"
             
 
