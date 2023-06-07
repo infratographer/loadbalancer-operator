@@ -5,7 +5,7 @@
 
 ## Purpose
 
-The purpose of the load-balancer-operator is to manage the load balancer lifecycle based upon requests that are send to the Load Balancer API. By subscribing to the various events that are created by the API, the operator can then take the appropriate CUD action on a load balancer and ensure that is deployed to a specified Kubernetes cluster.
+The purpose of the load-balancer-operator is to manage the load balancer lifecycle based upon requests that are sent to the Load Balancer API. By subscribing to the various events that are created by the API, the operator can then take the appropriate CUD action on a load balancer and ensure that is deployed to a specified Kubernetes cluster.
 
 ## Workflow
 
