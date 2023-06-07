@@ -25,10 +25,10 @@ operator:
   healthCheckPort: "8080"
   replicas: 1
   extraLabels: []
-  extraAnnotations: [] 
+  extraAnnotations: []
   extraEnvVars: []
-#    - name: LOADBALANCEROPERATOR_EVENTS_SUBSCRIBER_NATS_CREDSFILE
-#      value: "/creds"
+  #    - name: LOADBALANCEROPERATOR_EVENTS_SUBSCRIBER_NATS_CREDSFILE
+  #      value: "/creds"
   resources: {}
   podSecurityContext: {}
   securityContext: {}
@@ -36,8 +36,6 @@ operator:
     endpoint: "https://localhost:7608/query"
     oidc:
       enabled: false
-      audience: ""
-      issuer: ""
   chart:
     chartValues: ""
     chartBinaryData: ""
