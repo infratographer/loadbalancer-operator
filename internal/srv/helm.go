@@ -47,7 +47,6 @@ func (v helmvalues) generateLBHelmVals(lb *loadBalancer, s *Server) {
 		if sports, err := json.Marshal(sport); err != nil {
 			s.Logger.Debugw("unable to marshal service ports", "error", err, "loadbalancer", lb.loadBalancerID.String())
 		} else {
-			fmt.Printf("%s=%s\n", s.ServicePortKey, string(sports))
 			v.JSONValues = append(v.JSONValues, fmt.Sprintf("%s=%s", s.ServicePortKey, string(sports)))
 		}
 	}

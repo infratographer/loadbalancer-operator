@@ -167,7 +167,7 @@ func (s *Server) updateDeployment(lb *loadBalancer) error {
 
 	client, err := s.newHelmClient(hash)
 	if err != nil {
-		s.Logger.Errorln("unable to initialize helm client: %s", err)
+		s.Logger.Errorw("unable to initialize helm client", "error", err)
 		return err
 	}
 
