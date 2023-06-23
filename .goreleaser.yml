@@ -95,8 +95,6 @@ release:
   name_template: 'Release {{ or (and (or .IsNightly .IsSnapshot) .Version) (printf "v%s" .Version) }}'
   header: |
     # What's Changed
-  extra_files:
-    - glob: ./schema.graphql
 
 nightly:
   name_template: main-latest
