@@ -1,6 +1,7 @@
 package srv
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/ThreeDotsLabs/watermill/message"
@@ -38,10 +39,12 @@ func (s *Server) processEvent(messages <-chan *message.Message) {
 
 			if lb.lbType != typeNoLB {
 				switch {
-				case m.EventType == "create" && lb.lbType == typeLB:
-					s.Logger.Debugw("stub for creating loadbalancer", "loadbalancer", lb.loadBalancerID.String())
-				case m.EventType == "delete" && lb.lbType == typeLB:
-					s.Logger.Debugw("stub for deleting loadbalancer", "loadbalancer", lb.loadBalancerID.String())
+				case m.EventType == "ip-address.assigned":
+					fmt.Println("hello")
+				// case m.EventType == "create" && lb.lbType == typeLB:
+				// 	s.Logger.Debugw("stub for creating loadbalancer", "loadbalancer", lb.loadBalancerID.String())
+				// case m.EventType == "delete" && lb.lbType == typeLB:
+				// 	s.Logger.Debugw("stub for deleting loadbalancer", "loadbalancer", lb.loadBalancerID.String())
 				default:
 					s.Logger.Debugw("stub for updating loadbalancer", "loadbalancer", lb.loadBalancerID.String())
 				}

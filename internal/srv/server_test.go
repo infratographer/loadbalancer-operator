@@ -53,7 +53,7 @@ func (s srvTestSuite) TestRun() { //nolint:govet
 		Logger:           zap.NewNop().Sugar(),
 		KubeClient:       s.Kubeconfig,
 		SubscriberConfig: s.SubConfig,
-		Topics:           []string{"*.load-balancer-run"},
+		ChangeTopics:     []string{"*.load-balancer-run"},
 		Chart:            ch,
 		ValuesPath:       pwd + "/../../hack/ci/values.yaml",
 		Locations:        []string{"abcd1234"},
@@ -62,8 +62,7 @@ func (s srvTestSuite) TestRun() { //nolint:govet
 	err = srv.Run(srv.Context)
 
 	assert.Nil(s.T(), err)
-	assert.Len(s.T(), srv.eventChannels, len(srv.Topics))
-	assert.Len(s.T(), srv.changeChannels, len(srv.Topics))
+	assert.Len(s.T(), srv.changeChannels, len(srv.ChangeTopics))
 }
 
 // TODO: add test for consumer that is already bound
