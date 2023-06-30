@@ -5,6 +5,7 @@ go 1.20
 replace (
 	github.com/docker/cli => github.com/docker/cli v20.10.19+incompatible
 	github.com/docker/docker => github.com/docker/docker v20.10.19+incompatible
+	go.infratographer.com/loadbalancer-manager-haproxy => github.com/rizzza/loadbalancer-manager-haproxy v0.0.0-20230630055013-55ea81ee1bf3
 	oras.land/oras-go => oras.land/oras-go v1.2.2
 )
 
@@ -169,7 +170,11 @@ require (
 	github.com/3th1nk/cidr v0.2.0 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/go-sql-driver/mysql v1.7.1 // indirect
+	github.com/gofrs/flock v0.8.1 // indirect
+	github.com/google/renameio v1.0.1 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.15.0 // indirect
+	github.com/haproxytech/config-parser/v4 v4.1.0 // indirect
+	github.com/haproxytech/go-logger v1.1.0 // indirect
 	github.com/shurcooL/graphql v0.0.0-20220606043923-3cf50f8a0a29 // indirect
 	go.opentelemetry.io/otel/exporters/jaeger v1.16.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/internal/retry v1.16.0 // indirect
@@ -204,7 +209,7 @@ require (
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
-	go.infratographer.com/loadbalancer-manager-haproxy v0.0.0-20230612145135-7bf6c8074a9e
+	go.infratographer.com/loadbalancer-manager-haproxy v0.0.2-0.20230629152456-127f95ada7fc
 	go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho v0.42.0 // indirect
 	go.opentelemetry.io/otel v1.16.0 // indirect
 	go.opentelemetry.io/otel/metric v1.16.0 // indirect
