@@ -20,7 +20,7 @@ import (
 	"go.infratographer.com/loadbalanceroperator/internal/utils/mock"
 )
 
-func (suite srvTestSuite) TestProcessLoadBalancerChangeCreate() { //nolint:govet
+func (suite *srvTestSuite) TestProcessLoadBalancerChangeCreate() { //nolint:govet
 	type testCase struct {
 		name           string
 		msg            pubsubx.ChangeMessage
@@ -97,7 +97,7 @@ func (suite srvTestSuite) TestProcessLoadBalancerChangeCreate() { //nolint:govet
 	}
 }
 
-func (suite srvTestSuite) TestProcessLoadBalancerDelete() { //nolint:govet
+func (suite *srvTestSuite) TestProcessLoadBalancerDelete() { //nolint:govet
 	type testCase struct {
 		name        string
 		msg         pubsubx.ChangeMessage
@@ -181,7 +181,7 @@ func (suite srvTestSuite) TestProcessLoadBalancerDelete() { //nolint:govet
 	}
 }
 
-func (suite srvTestSuite) TestProcessLoadBalancerUpdate() { //nolint:govet
+func (suite *srvTestSuite) TestProcessLoadBalancerUpdate() { //nolint:govet
 	dir, cp, ch, pwd := utils.CreateWorkspace("test-delete-lb")
 	defer os.RemoveAll(dir)
 

@@ -16,7 +16,7 @@ import (
 	"helm.sh/helm/v3/pkg/chart/loader"
 )
 
-func (s srvTestSuite) TestRun() { //nolint:govet
+func (suite *srvTestSuite) TestRun() { //nolint:govet
 	id := gidx.MustNewID("loadbal")
 
 	api := mock.DummyAPI(id.String())
@@ -26,24 +26,24 @@ func (s srvTestSuite) TestRun() { //nolint:govet
 
 	testDir, err := os.MkdirTemp("", "test-process-change")
 	if err != nil {
-		s.T().Fatal(err)
+		suite.T().Fatal(err)
 	}
 
 	defer os.RemoveAll(testDir)
 
 	chartPath, err := utils.CreateTestChart(testDir)
 	if err != nil {
-		s.T().Fatal(err)
+		suite.T().Fatal(err)
 	}
 
 	ch, err := loader.Load(chartPath)
 	if err != nil {
-		s.T().Fatal(err)
+		suite.T().Fatal(err)
 	}
 
 	pwd, err := os.Getwd()
 	if err != nil {
-		s.T().Fatal(err)
+		suite.T().Fatal(err)
 	}
 
 	srv := Server{
@@ -51,8 +51,8 @@ func (s srvTestSuite) TestRun() { //nolint:govet
 		Echo:             eSrv,
 		Context:          context.TODO(),
 		Logger:           zap.NewNop().Sugar(),
-		KubeClient:       s.Kubeconfig,
-		SubscriberConfig: s.SubConfig,
+		KubeClient:       suite.Kubeconfig,
+		SubscriberConfig: suite.SubConfig,
 		ChangeTopics:     []string{"*.load-balancer-run"},
 		Chart:            ch,
 		ValuesPath:       pwd + "/../../hack/ci/values.yaml",
@@ -61,8 +61,8 @@ func (s srvTestSuite) TestRun() { //nolint:govet
 
 	err = srv.Run(srv.Context)
 
-	assert.Nil(s.T(), err)
-	assert.Len(s.T(), srv.changeChannels, len(srv.ChangeTopics))
+	assert.Nil(suite.T(), err)
+	assert.Len(suite.T(), srv.changeChannels, len(srv.ChangeTopics))
 }
 
 // TODO: add test for consumer that is already bound
