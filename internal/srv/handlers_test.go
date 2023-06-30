@@ -162,7 +162,7 @@ func (suite *srvTestSuite) TestProcessEvent() { //nolint:govet
 		Logger:           zap.NewNop().Sugar(),
 		KubeClient:       suite.Kubeconfig,
 		SubscriberConfig: suite.SubConfig,
-		ChangeTopics:     []string{"*.load-balancer-event"},
+		EventTopics:      []string{"*.load-balancer-event"},
 		Chart:            ch,
 		ValuesPath:       pwd + "/../../hack/ci/values.yaml",
 		Locations:        []string{"abcd1234"},
