@@ -209,7 +209,7 @@ require (
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
-	go.infratographer.com/loadbalancer-manager-haproxy v0.0.2-0.20230629152456-127f95ada7fc
+	go.infratographer.com/loadbalancer-manager-haproxy v0.0.2-0.20230630133704-23ed3250a567
 	go.opentelemetry.io/contrib/instrumentation/github.com/labstack/echo/otelecho v0.42.0 // indirect
 	go.opentelemetry.io/otel v1.16.0 // indirect
 	go.opentelemetry.io/otel/metric v1.16.0 // indirect
