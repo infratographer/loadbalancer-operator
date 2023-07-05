@@ -32,7 +32,7 @@ jobs:
       #     mkdir bin
       #     KUBEBUILDER_ASSETS="$$(setup-envtest use ${{ matrix.k8s-version}} --bin-dir $(PWD)/bin -p path)" go test -cover ./...
 
-      - uses: tylerauerbeck/envtest-action@latest
+      - uses: tylerauerbeck/envtest-action@main
         with:
           version: ${{ matrix.k8s-version }}
           args: './...'
