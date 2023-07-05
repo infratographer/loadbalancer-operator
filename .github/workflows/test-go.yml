@@ -1,0 +1,33 @@
+---
+name: Test - Golang
+
+# Run for all pushes to main and pull requests when Go or YAML files change
+on:
+  push:
+  pull_request:
+
+jobs:
+  gotest:
+    name: test
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        k8s-version: ["1.25", "1.26", "1.27"]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+     
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: 'go.mod'
+
+      - name: Install envtest for kube tests
+        run: go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest
+
+      - name: Run go tests for ${{ matrix.k8s-version }}
+        run: |
+          mkdir bin
+          KUBEBUILDER_ASSETS="$$(setup-envtest use ${{ matrix.k8s-version}} --bin-dir $(PWD)/bin -p path)" go test -cover ./...
