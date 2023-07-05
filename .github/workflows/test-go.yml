@@ -27,7 +27,12 @@ jobs:
       - name: Install envtest for kube tests
         run: go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest
 
-      - name: Run go tests for ${{ matrix.k8s-version }}
-        run: |
-          mkdir bin
-          KUBEBUILDER_ASSETS="$$(setup-envtest use ${{ matrix.k8s-version}} --bin-dir $(PWD)/bin -p path)" go test -cover ./...
+      # - name: Run go tests for ${{ matrix.k8s-version }}
+      #   run: |
+      #     mkdir bin
+      #     KUBEBUILDER_ASSETS="$$(setup-envtest use ${{ matrix.k8s-version}} --bin-dir $(PWD)/bin -p path)" go test -cover ./...
+
+      - uses: tylerauerbeck/envtest-action@latest
+        with:
+          version: ${{ matrix.k8s-version }}
+          args: './...'
