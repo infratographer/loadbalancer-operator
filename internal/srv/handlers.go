@@ -72,40 +72,38 @@ func (s *Server) processChange(messages <-chan *message.Message) {
 		if err != nil {
 			s.Logger.Errorw("unable to unmarshal change message", "error", err, "messageID", msg.UUID)
 			msg.Nack()
-		}
-
-		if slices.ContainsFunc(m.AdditionalSubjectIDs, s.locationCheck) || len(s.Locations) == 0 {
+		} else if slices.ContainsFunc(m.AdditionalSubjectIDs, s.locationCheck) || len(s.Locations) == 0 {
 			if m.EventType == string(events.DeleteChangeType) {
 				lb = &loadBalancer{loadBalancerID: m.SubjectID, lbData: nil, lbType: typeLB}
 			} else {
 				lb, err = s.newLoadBalancer(m.SubjectID, m.AdditionalSubjectIDs)
 				if err != nil {
-					s.Logger.Errorw("unable to initialize loadbalancer", "error", err, "messageID", msg.UUID)
+					s.Logger.Errorw("unable to initialize loadbalancer", "error", err, "messageID", msg.UUID, "loadbalancerID", lb.loadBalancerID.String())
 					msg.Nack()
 				}
 			}
 
-			if lb.lbType != typeNoLB {
+			if lb != nil && lb.lbType != typeNoLB {
 				switch {
 				case m.EventType == string(events.CreateChangeType) && lb.lbType == typeLB:
 					s.Logger.Debugw("creating loadbalancer", "loadbalancer", lb.loadBalancerID.String())
 
 					if err := s.processLoadBalancerChangeCreate(lb); err != nil {
-						s.Logger.Errorw("handler unable to create loadbalancer", "error", err)
+						s.Logger.Errorw("handler unable to create loadbalancer", "error", err, "loadbalancerID", lb.loadBalancerID.String())
 						msg.Nack()
 					}
 				case m.EventType == string(events.DeleteChangeType) && lb.lbType == typeLB:
 					s.Logger.Debugw("deleting loadbalancer", "loadbalancer", lb.loadBalancerID.String())
 
 					if err := s.processLoadBalancerChangeDelete(lb); err != nil {
-						s.Logger.Errorw("handler unable to delete loadbalancer", "error", err)
+						s.Logger.Errorw("handler unable to delete loadbalancer", "error", err, "loadbalancerID", lb.loadBalancerID.String())
 						msg.Nack()
 					}
 				default:
 					s.Logger.Debugw("updating loadbalancer", "loadbalancer", lb.loadBalancerID.String())
 
 					if err := s.processLoadBalancerChangeUpdate(lb); err != nil {
-						s.Logger.Errorw("handler unable to update loadbalancer", "error", err)
+						s.Logger.Errorw("handler unable to update loadbalancer", "error", err, "loadbalancerID", lb.loadBalancerID.String())
 						msg.Nack()
 					}
 				}
