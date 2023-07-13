@@ -162,7 +162,7 @@ require (
 	github.com/gobuffalo/packr/v2 v2.8.3
 	github.com/labstack/echo/v4 v4.10.2
 	go.infratographer.com/ipam-api v0.0.3-0.20230627135853-8acda8f15bbe
-	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1
+	golang.org/x/exp v0.0.0-20230713183714-613f0c0eb8a1
 	sigs.k8s.io/controller-runtime v0.14.5
 )
 
