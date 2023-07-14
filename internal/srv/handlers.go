@@ -29,6 +29,8 @@ func (s *Server) processEvent(messages <-chan *message.Message) {
 		if err != nil {
 			s.Logger.Errorw("unable to unmarshal event message", "error", err)
 			msg.Nack()
+
+			continue
 		}
 
 		if slices.ContainsFunc(m.AdditionalSubjectIDs, s.locationCheck) || len(s.Locations) == 0 {
@@ -38,11 +40,11 @@ func (s *Server) processEvent(messages <-chan *message.Message) {
 				lb, err = s.newLoadBalancer(m.SubjectID, m.AdditionalSubjectIDs)
 				if err != nil {
 					s.Logger.Errorw("unable to initialize loadbalancer", "error", err, "messageID", msg.UUID)
-					msg.Nack()
+					// msg.Nack()
 				}
 			}
 
-			if lb.lbType != typeNoLB {
+			if lb != nil && lb.lbType != typeNoLB {
 				switch {
 				case m.EventType == "ip-address.assigned":
 					s.Logger.Debugw("ip address processed. updating loadbalancer", "loadbalancer", lb.loadBalancerID.String())
@@ -72,13 +74,17 @@ func (s *Server) processChange(messages <-chan *message.Message) {
 		if err != nil {
 			s.Logger.Errorw("unable to unmarshal change message", "error", err, "messageID", msg.UUID)
 			msg.Nack()
-		} else if slices.ContainsFunc(m.AdditionalSubjectIDs, s.locationCheck) || len(s.Locations) == 0 {
+
+			continue
+		}
+
+		if slices.ContainsFunc(m.AdditionalSubjectIDs, s.locationCheck) || len(s.Locations) == 0 {
 			if m.EventType == string(events.DeleteChangeType) {
 				lb = &loadBalancer{loadBalancerID: m.SubjectID, lbData: nil, lbType: typeLB}
 			} else {
 				lb, err = s.newLoadBalancer(m.SubjectID, m.AdditionalSubjectIDs)
 				if err != nil {
-					s.Logger.Errorw("unable to initialize loadbalancer", "error", err, "messageID", msg.UUID, "loadbalancerID", lb.loadBalancerID.String())
+					s.Logger.Errorw("unable to initialize loadbalancer", "error", err, "messageID", msg.UUID, "subjectID", m.SubjectID.String())
 					msg.Nack()
 				}
 			}
