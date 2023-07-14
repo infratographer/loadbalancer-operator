@@ -5,7 +5,7 @@ go 1.20
 replace (
 	github.com/docker/cli => github.com/docker/cli v20.10.19+incompatible
 	github.com/docker/docker => github.com/docker/docker v20.10.19+incompatible
-	go.infratographer.com/loadbalancer-manager-haproxy => github.com/rizzza/loadbalancer-manager-haproxy v0.0.0-20230712143537-9a240f9632db
+	go.infratographer.com/loadbalancer-manager-haproxy => github.com/rizzza/loadbalancer-manager-haproxy v0.0.0-20230713150903-ebf6b33590b6
 	oras.land/oras-go => oras.land/oras-go v1.2.2
 )
 
@@ -17,7 +17,7 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.16.0
 	github.com/stretchr/testify v1.8.4
-	go.infratographer.com/x v0.3.2
+	go.infratographer.com/x v0.3.3-0.20230714174858-099a72673ea8
 	go.uber.org/zap v1.24.0
 	helm.sh/helm/v3 v3.12.0
 	k8s.io/apimachinery v0.27.1
@@ -84,7 +84,7 @@ require (
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
-	github.com/mattn/go-isatty v0.0.18 // indirect
+	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
