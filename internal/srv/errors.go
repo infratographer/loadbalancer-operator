@@ -13,4 +13,5 @@ var (
 	errInvalidNamespace        = errors.New("unable to create namespace")
 	errInvalidRoleBinding      = errors.New("unable to create namespace role binding")
 	errInvalidHelmValues       = errors.New("unable to create helm values")
+	errLoadBalancerNotFound    = errors.New("loadbalancer not found")
 )

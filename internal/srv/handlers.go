@@ -1,6 +1,7 @@
 package srv
 
 import (
+	"errors"
 	"strings"
 
 	"github.com/ThreeDotsLabs/watermill/message"
@@ -85,7 +86,15 @@ func (s *Server) processChange(messages <-chan *message.Message) {
 				lb, err = s.newLoadBalancer(m.SubjectID, m.AdditionalSubjectIDs)
 				if err != nil {
 					s.Logger.Errorw("unable to initialize loadbalancer", "error", err, "messageID", msg.UUID, "subjectID", m.SubjectID.String())
-					msg.Nack()
+					if errors.Is(err, errLoadBalancerNotFound) {
+						// ack and ignore
+						msg.Ack()
+					} else {
+						// nack and retry
+						msg.Nack()
+					}
+
+					continue
 				}
 			}
 
