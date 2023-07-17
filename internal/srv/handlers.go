@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/ThreeDotsLabs/watermill/message"
+	"go.infratographer.com/loadbalancer-manager-haproxy/pkg/lbapi"
 	"go.infratographer.com/x/events"
 	"go.infratographer.com/x/gidx"
 	"golang.org/x/exp/slices"
@@ -41,7 +42,7 @@ func (s *Server) processEvent(messages <-chan *message.Message) {
 				lb, err = s.newLoadBalancer(m.SubjectID, m.AdditionalSubjectIDs)
 				if err != nil {
 					s.Logger.Errorw("unable to initialize loadbalancer", "error", err, "messageID", msg.UUID)
-					// msg.Nack()
+					msg.Nack()
 				}
 			}
 
@@ -86,7 +87,7 @@ func (s *Server) processChange(messages <-chan *message.Message) {
 				lb, err = s.newLoadBalancer(m.SubjectID, m.AdditionalSubjectIDs)
 				if err != nil {
 					s.Logger.Errorw("unable to initialize loadbalancer", "error", err, "messageID", msg.UUID, "subjectID", m.SubjectID.String())
-					if errors.Is(err, errLoadBalancerNotFound) {
+					if errors.Is(err, lbapi.ErrLBNotfound) {
 						// ack and ignore
 						msg.Ack()
 					} else {
