@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"helm.sh/helm/v3/pkg/action"
+	"helm.sh/helm/v3/pkg/storage/driver"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	applyv1 "k8s.io/client-go/applyconfigurations/core/v1"
@@ -177,6 +178,12 @@ func (s *Server) updateDeployment(lb *loadBalancer) error {
 
 	if err != nil {
 		s.Logger.Errorw("unable to upgrade loadbalancer", "error", err, "namespace", hash, "releaseName", releaseName, "loadBalancer", lb.loadBalancerID.String())
+
+		// no-op if the release no longer exists
+		if errors.Is(err, driver.ErrNoDeployedReleases) {
+			return nil
+		}
+
 		return err
 	}
 
@@ -233,12 +240,25 @@ func hashLBName(name string) string {
 }
 
 func (s *Server) createDeployment(_ context.Context, lb *loadBalancer) error {
+	deployed, err := s.hasDeployment(context.TODO(), lb)
+	if err != nil {
+		return err
+	}
+
+	if deployed {
+		return s.updateDeployment(lb)
+	}
+
+	return s.newDeployment(lb)
+}
+
+func (s *Server) hasDeployment(_ context.Context, lb *loadBalancer) (bool, error) {
 	hash := hashLBName(lb.loadBalancerID.String())
 
 	client, err := s.newHelmClient(hash)
 	if err != nil {
 		s.Logger.Debugw("unable to initialize helm client", "error", err, "loadBalancer", lb.loadBalancerID.String())
-		return err
+		return false, err
 	}
 
 	hc := action.NewList(client)
@@ -246,12 +266,12 @@ func (s *Server) createDeployment(_ context.Context, lb *loadBalancer) error {
 
 	if err != nil {
 		s.Logger.Debugw("unable to list helm releases", "error", err, "loadBalancer", lb.loadBalancerID.String())
-		return err
+		return false, err
 	}
 
 	if len(list) > 0 {
-		return s.updateDeployment(lb)
-	} else {
-		return s.newDeployment(lb)
+		return true, nil
 	}
+
+	return false, nil
 }

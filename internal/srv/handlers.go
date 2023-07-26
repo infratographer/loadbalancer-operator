@@ -51,7 +51,7 @@ func (s *Server) processEvent(messages <-chan *message.Message) {
 				case m.EventType == "ip-address.assigned":
 					s.Logger.Debugw("ip address processed. updating loadbalancer", "loadbalancer", lb.loadBalancerID.String())
 
-					if err := s.updateDeployment(lb); err != nil {
+					if err := s.processLoadBalancerEventUpdate(lb); err != nil {
 						s.Logger.Errorw("unable to update loadbalancer", "error", err, "messageID", msg.UUID, "loadbalancer", lb.loadBalancerID.String())
 						msg.Nack()
 					}
