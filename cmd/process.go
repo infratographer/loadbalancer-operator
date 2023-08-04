@@ -122,6 +122,9 @@ func process(ctx context.Context, logger *zap.SugaredLogger) error {
 		SubscriberConfig: config.AppConfig.Events.Subscriber,
 		ValuesPath:       viper.GetString("chart-values-path"),
 		Locations:        viper.GetStringSlice("event-locations"),
+
+		ContainerPortKey: viper.GetString("helm-containerport-key"),
+		ServicePortKey:   viper.GetString("helm-serviceport-key"),
 	}
 
 	// init lbapi client
