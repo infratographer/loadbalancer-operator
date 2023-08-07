@@ -155,6 +155,10 @@ func process(ctx context.Context, logger *zap.SugaredLogger) error {
 	cancel()
 	logger.Infof("exiting. Performing necessary cleanup", recvSig)
 
+	if err := server.Shutdown(); err != nil {
+		logger.Errorw("failed to shutdown server", zap.Error(err))
+	}
+
 	return nil
 }
 
