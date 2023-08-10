@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"helm.sh/helm/v3/pkg/action"
+	"helm.sh/helm/v3/pkg/storage/driver"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	applyv1 "k8s.io/client-go/applyconfigurations/core/v1"
@@ -115,7 +116,7 @@ func (s *Server) newDeployment(lb *loadBalancer) error {
 	hash := hashLBName(lb.loadBalancerID.String())
 
 	if _, err := s.CreateNamespace(hash); err != nil {
-		s.Logger.Errorw("unable to create namespace", "error", err, "namespace", hash, "loadBalancer", lb.loadBalancerID.String())
+		s.Logger.Debugw("unable to create namespace", "error", err, "namespace", hash, "loadBalancer", lb.loadBalancerID.String())
 		return err
 	}
 
@@ -126,7 +127,7 @@ func (s *Server) newDeployment(lb *loadBalancer) error {
 
 	values, err := s.newHelmValues(lb)
 	if err != nil {
-		s.Logger.Errorw("unable to prepare chart values", "error", err, "loadBalancer", lb.loadBalancerID.String(), "namespace", hash)
+		s.Logger.Debugw("unable to prepare chart values", "error", err, "loadBalancer", lb.loadBalancerID.String(), "namespace", hash)
 		return err
 	}
 
@@ -175,7 +176,7 @@ func (s *Server) updateDeployment(lb *loadBalancer) error {
 	hc.Namespace = hash
 	_, err = hc.Run(releaseName, s.Chart, values)
 
-	if err != nil {
+	if err != nil && !errors.Is(err, driver.ErrReleaseExists) {
 		s.Logger.Errorw("unable to upgrade loadbalancer", "error", err, "namespace", hash, "releaseName", releaseName, "loadBalancer", lb.loadBalancerID.String())
 		return err
 	}
@@ -235,23 +236,27 @@ func hashLBName(name string) string {
 func (s *Server) createDeployment(_ context.Context, lb *loadBalancer) error {
 	hash := hashLBName(lb.loadBalancerID.String())
 
+	releaseName := fmt.Sprintf("lb-%s", hash)
+	if !checkNameLength(releaseName, helmReleaseLength) {
+		releaseName = releaseName[0:helmReleaseLength]
+	}
+
 	client, err := s.newHelmClient(hash)
 	if err != nil {
 		s.Logger.Debugw("unable to initialize helm client", "error", err, "loadBalancer", lb.loadBalancerID.String())
 		return err
 	}
 
-	hc := action.NewList(client)
-	list, err := hc.Run()
+	histClient := action.NewHistory(client)
+	histClient.Max = 1
 
-	if err != nil {
-		s.Logger.Debugw("unable to list helm releases", "error", err, "loadBalancer", lb.loadBalancerID.String())
+	if _, err := histClient.Run(releaseName); errors.Is(err, driver.ErrReleaseNotFound) {
+		return s.newDeployment(lb)
+	}
+
+	if err = s.updateDeployment(lb); !errors.Is(err, driver.ErrReleaseExists) {
 		return err
 	}
 
-	if len(list) > 0 {
-		return s.updateDeployment(lb)
-	} else {
-		return s.newDeployment(lb)
-	}
+	return nil
 }
