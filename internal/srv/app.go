@@ -142,12 +142,15 @@ func (s *Server) newDeployment(lb *loadBalancer) error {
 	hc.Namespace = hash
 	_, err = hc.Run(s.Chart, values)
 
-	if err != nil {
+	switch err {
+	case nil:
+		s.Logger.Infow("loadbalancer deployed successfully", "namespace", hash, "releaseName", releaseName, "loadBalancer", lb.loadBalancerID.String())
+	case driver.ErrReleaseExists:
+		s.Logger.Debugw("loadbalancer already exists; proceeding to upgrade", "namespace", hash, "releaseName", releaseName, "loadBalancer", lb.loadBalancerID.String())
+	default:
 		s.Logger.Errorw("unable to deploy loadbalancer", "error", err, "namespace", hash, "releaseName", releaseName, "loadBalancer", lb.loadBalancerID.String())
 		return err
 	}
-
-	s.Logger.Infow("loadbalancer deployed successfully", "namespace", hash, "releaseName", releaseName, "loadBalancer", lb.loadBalancerID.String())
 
 	return nil
 }
@@ -176,12 +179,16 @@ func (s *Server) updateDeployment(lb *loadBalancer) error {
 	hc.Namespace = hash
 	_, err = hc.Run(releaseName, s.Chart, values)
 
-	if err != nil && !errors.Is(err, driver.ErrReleaseExists) {
+	switch err {
+	case nil:
+		s.Logger.Infow("loadbalancer upgraded successfully", "namespace", hash, "releaseName", releaseName, "loadBalancer", lb.loadBalancerID.String())
+	case driver.ErrReleaseExists:
+		s.Logger.Infow("loadbalancer upgraded successfully", "namespace", hash, "releaseName", releaseName, "loadBalancer", lb.loadBalancerID.String())
+		s.Logger.Debugw("release exists; loadbalancer upgraded successfully", "namespace", hash, "releaseName", releaseName, "loadBalancer", lb.loadBalancerID.String())
+	default:
 		s.Logger.Errorw("unable to upgrade loadbalancer", "error", err, "namespace", hash, "releaseName", releaseName, "loadBalancer", lb.loadBalancerID.String())
 		return err
 	}
-
-	s.Logger.Infow("loadbalancer upgraded successfully", "namespace", hash, "releaseName", releaseName, "loadBalancer", lb.loadBalancerID.String())
 
 	return nil
 }
@@ -251,7 +258,10 @@ func (s *Server) createDeployment(_ context.Context, lb *loadBalancer) error {
 	histClient.Max = 1
 
 	if _, err := histClient.Run(releaseName); errors.Is(err, driver.ErrReleaseNotFound) {
-		return s.newDeployment(lb)
+		err = s.newDeployment(lb)
+		if err != nil && !errors.Is(err, driver.ErrReleaseExists) {
+			return err
+		}
 	}
 
 	if err = s.updateDeployment(lb); !errors.Is(err, driver.ErrReleaseExists) {
