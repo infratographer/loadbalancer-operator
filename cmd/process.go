@@ -39,7 +39,10 @@ var processCmd = &cobra.Command{
 }
 
 var (
-	processDevMode bool
+	processDevMode     bool
+	defaultCooldown    = 5
+	defaultJitter      = 0.5
+	defaultMaxInterval = 2 * time.Minute
 )
 
 const (
@@ -121,9 +124,9 @@ func process(ctx context.Context, logger *zap.SugaredLogger) error {
 
 	backoffPolicy := backoff.Exponential(
 		backoff.WithMinInterval(time.Second),
-		backoff.WithMaxInterval(2*time.Minute),
-		backoff.WithJitterFactor(0.05),
-		backoff.WithMaxRetries(5),
+		backoff.WithMaxInterval(defaultMaxInterval),
+		backoff.WithJitterFactor(defaultJitter),
+		backoff.WithMaxRetries(defaultCooldown),
 	)
 
 	server := &srv.Server{

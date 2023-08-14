@@ -20,7 +20,8 @@ import (
 const (
 	helmReleaseLength = 53
 	kubeNSLength      = 63
-	defaultCooldown   = 5
+	DefaultCooldown   = 5
+	DefaultJitter     = 0.5
 )
 
 func (s *Server) removeNamespace(ns string) error {
