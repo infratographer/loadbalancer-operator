@@ -3,7 +3,9 @@ package srv
 import (
 	"context"
 	"os"
+	"time"
 
+	"github.com/lestrrat-go/backoff/v2"
 	"github.com/stretchr/testify/assert"
 
 	"go.infratographer.com/loadbalancer-manager-haproxy/pkg/lbapi"
@@ -66,6 +68,13 @@ func (suite *srvTestSuite) TestProcessChange() { //nolint:govet
 
 	loc, _ := gidx.Parse("testloc-abcd1234")
 
+	backoffPolicy := backoff.Exponential(
+		backoff.WithMinInterval(time.Second),
+		backoff.WithMaxInterval(2*time.Minute),
+		backoff.WithJitterFactor(0.05),
+		backoff.WithMaxRetries(5),
+	)
+
 	srv := Server{
 		APIClient:        lbapi.NewClient(api.URL),
 		Echo:             eSrv,
@@ -77,6 +86,7 @@ func (suite *srvTestSuite) TestProcessChange() { //nolint:govet
 		Chart:            ch,
 		ValuesPath:       pwd + "/../../hack/ci/values.yaml",
 		Locations:        []string{"abcd1234"},
+		BackoffConfig:    backoffPolicy,
 	}
 
 	// TODO: check that namespace does not exist
