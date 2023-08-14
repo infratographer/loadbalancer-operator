@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/ThreeDotsLabs/watermill/message"
+	"github.com/lestrrat-go/backoff/v2"
 	"go.infratographer.com/loadbalancer-manager-haproxy/pkg/lbapi"
 	"go.infratographer.com/x/echox"
 	"go.infratographer.com/x/events"
@@ -37,6 +38,8 @@ type Server struct {
 	ServicePortKey   string
 	ContainerPortKey string
 	MetricsPort      int
+
+	BackoffConfig backoff.Policy
 }
 
 // Run will start the server queue connections and healthcheck endpoints

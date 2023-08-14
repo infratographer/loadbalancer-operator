@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/lestrrat-go/backoff"
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/storage/driver"
 	v1 "k8s.io/api/core/v1"
@@ -19,6 +20,7 @@ import (
 const (
 	helmReleaseLength = 53
 	kubeNSLength      = 63
+	defaultCooldown   = 5
 )
 
 func (s *Server) removeNamespace(ns string) error {
@@ -179,16 +181,12 @@ func (s *Server) updateDeployment(lb *loadBalancer) error {
 	hc.Namespace = hash
 	_, err = hc.Run(releaseName, s.Chart, values)
 
-	switch err {
-	case nil:
-		s.Logger.Infow("loadbalancer upgraded successfully", "namespace", hash, "releaseName", releaseName, "loadBalancer", lb.loadBalancerID.String())
-	case driver.ErrReleaseExists:
-		s.Logger.Infow("loadbalancer upgraded successfully", "namespace", hash, "releaseName", releaseName, "loadBalancer", lb.loadBalancerID.String())
-		s.Logger.Debugw("release exists; loadbalancer upgraded successfully", "namespace", hash, "releaseName", releaseName, "loadBalancer", lb.loadBalancerID.String())
-	default:
-		s.Logger.Errorw("unable to upgrade loadbalancer", "error", err, "namespace", hash, "releaseName", releaseName, "loadBalancer", lb.loadBalancerID.String())
+	if err != nil {
+		s.Logger.Debugw("unable to upgrade loadbalancer", "error", err, "namespace", hash, "releaseName", releaseName, "loadBalancer", lb.loadBalancerID.String())
 		return err
 	}
+
+	s.Logger.Infow("loadbalancer upgraded successfully", "namespace", hash, "releaseName", releaseName, "loadBalancer", lb.loadBalancerID.String())
 
 	return nil
 }
@@ -264,9 +262,15 @@ func (s *Server) createDeployment(_ context.Context, lb *loadBalancer) error {
 		}
 	}
 
-	if err = s.updateDeployment(lb); !errors.Is(err, driver.ErrReleaseExists) {
-		return err
+	b := s.BackoffConfig.Start(s.Context)
+	for backoff.Continue(b) {
+		err = s.updateDeployment(lb)
+		if err == nil {
+			return nil
+		} else {
+			s.Logger.Debugw("unable to update loadbalancer; retrying...", "error", err, "loadBalancer", lb.loadBalancerID.String())
+		}
 	}
 
-	return nil
+	return err
 }

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os"
 	"os/signal"
+	"time"
 
 	"go.uber.org/zap"
 	"helm.sh/helm/v3/pkg/chart"
@@ -12,6 +13,7 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
+	"github.com/lestrrat-go/backoff/v2"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -117,6 +119,13 @@ func process(ctx context.Context, logger *zap.SugaredLogger) error {
 		logger.Fatal("failed to initialize new server", zap.Error(err))
 	}
 
+	backoffPolicy := backoff.Exponential(
+		backoff.WithMinInterval(time.Second),
+		backoff.WithMaxInterval(2*time.Minute),
+		backoff.WithJitterFactor(0.05),
+		backoff.WithMaxRetries(5),
+	)
+
 	server := &srv.Server{
 		Echo:             eSrv,
 		Chart:            chart,
@@ -133,6 +142,8 @@ func process(ctx context.Context, logger *zap.SugaredLogger) error {
 
 		ContainerPortKey: viper.GetString("helm-containerport-key"),
 		ServicePortKey:   viper.GetString("helm-serviceport-key"),
+
+		BackoffConfig: backoffPolicy,
 	}
 
 	// init lbapi client
