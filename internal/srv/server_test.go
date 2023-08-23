@@ -47,16 +47,17 @@ func (suite *srvTestSuite) TestRun() { //nolint:govet
 	}
 
 	srv := Server{
-		APIClient:        lbapi.NewClient(api.URL),
-		Echo:             eSrv,
-		Context:          context.TODO(),
-		Logger:           zap.NewNop().Sugar(),
-		KubeClient:       suite.Kubeconfig,
-		SubscriberConfig: suite.SubConfig,
-		ChangeTopics:     []string{"*.load-balancer-run"},
-		Chart:            ch,
-		ValuesPath:       pwd + "/../../hack/ci/values.yaml",
-		Locations:        []string{"abcd1234"},
+		APIClient:  lbapi.NewClient(api.URL),
+		Echo:       eSrv,
+		Context:    context.TODO(),
+		Logger:     zap.NewNop().Sugar(),
+		KubeClient: suite.Kubeconfig,
+		// SubscriberConfig: suite.SubConfig,
+		Connection:   suite.Connection,
+		ChangeTopics: []string{"*.load-balancer-run"},
+		Chart:        ch,
+		ValuesPath:   pwd + "/../../hack/ci/values.yaml",
+		Locations:    []string{"abcd1234"},
 	}
 
 	err = srv.Run(srv.Context)
