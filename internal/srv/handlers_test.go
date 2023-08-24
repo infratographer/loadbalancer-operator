@@ -73,11 +73,11 @@ func (suite *srvTestSuite) TestProcessChange() { //nolint:govet
 		Logger:     zap.NewNop().Sugar(),
 		KubeClient: suite.Kubeconfig,
 		// SubscriberConfig: suite.SubConfig,
-		Connection:   suite.Connection,
-		ChangeTopics: []string{"*.load-balancer"},
-		Chart:        ch,
-		ValuesPath:   pwd + "/../../hack/ci/values.yaml",
-		Locations:    []string{"abcd1234"},
+		EventsConnection: suite.Connection,
+		ChangeTopics:     []string{"*.load-balancer"},
+		Chart:            ch,
+		ValuesPath:       pwd + "/../../hack/ci/values.yaml",
+		Locations:        []string{"abcd1234"},
 	}
 
 	// TODO: check that namespace does not exist
@@ -87,7 +87,7 @@ func (suite *srvTestSuite) TestProcessChange() { //nolint:govet
 	// pub := suite.PubConfig
 	// p, _ := events.NewPublisher(pub)
 	// p, _ := events.Connection.
-	_, err = srv.Connection.PublishChange(context.TODO(), "load-balancer", events.ChangeMessage{
+	_, err = srv.EventsConnection.PublishChange(context.TODO(), "load-balancer", events.ChangeMessage{
 		EventType:            string(events.CreateChangeType),
 		SubjectID:            id,
 		AdditionalSubjectIDs: []gidx.PrefixedID{loc},
@@ -105,7 +105,7 @@ func (suite *srvTestSuite) TestProcessChange() { //nolint:govet
 	// TODO: check that namespace exists
 	// TODO: check that release exists
 
-	_, err = srv.Connection.PublishChange(context.TODO(), "load-balancer", events.ChangeMessage{
+	_, err = srv.EventsConnection.PublishChange(context.TODO(), "load-balancer", events.ChangeMessage{
 		EventType:            string(events.UpdateChangeType),
 		AdditionalSubjectIDs: []gidx.PrefixedID{loc},
 		SubjectID:            id,
@@ -118,7 +118,7 @@ func (suite *srvTestSuite) TestProcessChange() { //nolint:govet
 	// TODO: check that release exists
 	// TODO: verify some update, maybe with values file
 
-	_, err = srv.Connection.PublishChange(context.TODO(), "load-balancer", events.ChangeMessage{
+	_, err = srv.EventsConnection.PublishChange(context.TODO(), "load-balancer", events.ChangeMessage{
 		EventType:            string(events.UpdateChangeType),
 		AdditionalSubjectIDs: []gidx.PrefixedID{id, loc},
 		SubjectID:            gidx.MustNewID("loadprt"),
@@ -129,7 +129,7 @@ func (suite *srvTestSuite) TestProcessChange() { //nolint:govet
 
 	//TODO: verify some update exists
 
-	_, err = srv.Connection.PublishChange(context.TODO(), "load-balancer", events.ChangeMessage{
+	_, err = srv.EventsConnection.PublishChange(context.TODO(), "load-balancer", events.ChangeMessage{
 		EventType:            string(events.DeleteChangeType),
 		AdditionalSubjectIDs: []gidx.PrefixedID{loc},
 		SubjectID:            id,
@@ -173,19 +173,19 @@ func (suite *srvTestSuite) TestProcessEvent() { //nolint:govet
 	loc, _ := gidx.Parse("testloc-abcd1234")
 
 	srv := Server{
-		APIClient:   lbapi.NewClient(api.URL),
-		Echo:        eSrv,
-		Context:     context.TODO(),
-		Logger:      zap.NewNop().Sugar(),
-		KubeClient:  suite.Kubeconfig,
-		Connection:  suite.Connection,
-		EventTopics: []string{"*.load-balancer-event"},
-		Chart:       ch,
-		ValuesPath:  pwd + "/../../hack/ci/values.yaml",
-		Locations:   []string{"abcd1234"},
+		APIClient:        lbapi.NewClient(api.URL),
+		Echo:             eSrv,
+		Context:          context.TODO(),
+		Logger:           zap.NewNop().Sugar(),
+		KubeClient:       suite.Kubeconfig,
+		EventsConnection: suite.Connection,
+		EventTopics:      []string{"*.load-balancer-event"},
+		Chart:            ch,
+		ValuesPath:       pwd + "/../../hack/ci/values.yaml",
+		Locations:        []string{"abcd1234"},
 	}
 
-	_, err = srv.Connection.PublishEvent(context.TODO(), "load-balancer-event", events.EventMessage{
+	_, err = srv.EventsConnection.PublishEvent(context.TODO(), "load-balancer-event", events.EventMessage{
 		EventType:            "create",
 		SubjectID:            id,
 		AdditionalSubjectIDs: []gidx.PrefixedID{loc},
@@ -198,7 +198,7 @@ func (suite *srvTestSuite) TestProcessEvent() { //nolint:govet
 
 	go srv.processEvent(srv.eventChannels[0])
 
-	_, err = srv.Connection.PublishEvent(context.TODO(), "load-balancer-event", events.EventMessage{
+	_, err = srv.EventsConnection.PublishEvent(context.TODO(), "load-balancer-event", events.EventMessage{
 		EventType:            "update",
 		AdditionalSubjectIDs: []gidx.PrefixedID{loc},
 		SubjectID:            id,
@@ -207,7 +207,7 @@ func (suite *srvTestSuite) TestProcessEvent() { //nolint:govet
 		utils.ErrPanic("unable to publish message", err)
 	}
 
-	_, err = srv.Connection.PublishEvent(context.TODO(), "load-balancer-event", events.EventMessage{
+	_, err = srv.EventsConnection.PublishEvent(context.TODO(), "load-balancer-event", events.EventMessage{
 		EventType:            "delete",
 		AdditionalSubjectIDs: []gidx.PrefixedID{loc},
 		SubjectID:            id,

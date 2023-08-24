@@ -15,15 +15,15 @@ import (
 
 // Server holds options for server connectivity and settings
 type Server struct {
-	APIClient      *lbapi.Client
-	IPAMClient     *ipamclient.Client
-	Echo           *echox.Server
-	Context        context.Context
-	Connection     events.Connection
-	eventChannels  []<-chan events.Message[events.EventMessage]
-	changeChannels []<-chan events.Message[events.ChangeMessage]
-	Logger         *zap.SugaredLogger
-	KubeClient     *rest.Config
+	APIClient        *lbapi.Client
+	IPAMClient       *ipamclient.Client
+	Echo             *echox.Server
+	Context          context.Context
+	EventsConnection events.Connection
+	eventChannels    []<-chan events.Message[events.EventMessage]
+	changeChannels   []<-chan events.Message[events.ChangeMessage]
+	Logger           *zap.SugaredLogger
+	KubeClient       *rest.Config
 	// SubscriberConfig events.SubscriberConfig
 	// subscribers      []*events.Subscriber
 	Debug            bool
@@ -67,7 +67,7 @@ func (s *Server) Run(ctx context.Context) error {
 }
 
 func (s *Server) Shutdown() error {
-	if err := s.Connection.Shutdown(s.Context); err != nil {
+	if err := s.EventsConnection.Shutdown(s.Context); err != nil {
 		s.Logger.Debugw("Unable to shutdown connection", "error", err)
 		return err
 	}
@@ -83,7 +83,7 @@ func (s *Server) configureSubscribers() error {
 	for _, topic := range s.ChangeTopics {
 		s.Logger.Debugw("subscribing to change topic", "topic", topic)
 
-		c, err := s.Connection.SubscribeChanges(s.Context, topic)
+		c, err := s.EventsConnection.SubscribeChanges(s.Context, topic)
 		if err != nil {
 			s.Logger.Errorw("unable to subscribe to change topic", "error", err, "topic", topic, "type", "change")
 			return errSubscriptionCreate
@@ -95,7 +95,7 @@ func (s *Server) configureSubscribers() error {
 	for _, topic := range s.EventTopics {
 		s.Logger.Debugw("subscribing to event topic", "topic", topic)
 
-		e, err := s.Connection.SubscribeEvents(s.Context, topic)
+		e, err := s.EventsConnection.SubscribeEvents(s.Context, topic)
 		if err != nil {
 			s.Logger.Errorw("unable to subscribe to event topic", "error", err, "topic", topic, "type", "event")
 			return errSubscriptionCreate

@@ -53,11 +53,11 @@ func (suite *srvTestSuite) TestRun() { //nolint:govet
 		Logger:     zap.NewNop().Sugar(),
 		KubeClient: suite.Kubeconfig,
 		// SubscriberConfig: suite.SubConfig,
-		Connection:   suite.Connection,
-		ChangeTopics: []string{"*.load-balancer-run"},
-		Chart:        ch,
-		ValuesPath:   pwd + "/../../hack/ci/values.yaml",
-		Locations:    []string{"abcd1234"},
+		EventsConnection: suite.Connection,
+		ChangeTopics:     []string{"*.load-balancer-run"},
+		Chart:            ch,
+		ValuesPath:       pwd + "/../../hack/ci/values.yaml",
+		Locations:        []string{"abcd1234"},
 	}
 
 	err = srv.Run(srv.Context)
