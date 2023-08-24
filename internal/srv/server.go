@@ -24,8 +24,6 @@ type Server struct {
 	changeChannels   []<-chan events.Message[events.ChangeMessage]
 	Logger           *zap.SugaredLogger
 	KubeClient       *rest.Config
-	// SubscriberConfig events.SubscriberConfig
-	// subscribers      []*events.Subscriber
 	Debug            bool
 	EventTopics      []string
 	ChangeTopics     []string

@@ -52,8 +52,6 @@ func CreateTestValues(outputDir string, yamlString string) (string, error) {
 type OperatorTestSuite struct {
 	suite.Suite
 	Connection events.Connection
-	// PubConfig  events.PublisherConfig
-	// SubConfig  events.SubscriberConfig
 	Logger     *zap.SugaredLogger
 	Kubeenv    *envtest.Environment
 	Kubeconfig *rest.Config

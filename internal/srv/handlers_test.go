@@ -84,9 +84,6 @@ func (suite *srvTestSuite) TestProcessChange() { //nolint:govet
 	// TODO: check that release does not exist
 
 	// publish a message to the change channel
-	// pub := suite.PubConfig
-	// p, _ := events.NewPublisher(pub)
-	// p, _ := events.Connection.
 	_, err = srv.EventsConnection.PublishChange(context.TODO(), "load-balancer", events.ChangeMessage{
 		EventType:            string(events.CreateChangeType),
 		SubjectID:            id,

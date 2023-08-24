@@ -133,10 +133,9 @@ func process(ctx context.Context, logger *zap.SugaredLogger) error {
 		Logger:           logger,
 		EventTopics:      viper.GetStringSlice("event-topics"),
 		ChangeTopics:     viper.GetStringSlice("change-topics"),
-		// SubscriberConfig: config.AppConfig.Events.Subscriber,
-		ValuesPath:  viper.GetString("chart-values-path"),
-		Locations:   viper.GetStringSlice("event-locations"),
-		MetricsPort: viper.GetInt("loadbalancer-metrics-port"),
+		ValuesPath:       viper.GetString("chart-values-path"),
+		Locations:        viper.GetStringSlice("event-locations"),
+		MetricsPort:      viper.GetInt("loadbalancer-metrics-port"),
 
 		ContainerPortKey: viper.GetString("helm-containerport-key"),
 		ServicePortKey:   viper.GetString("helm-serviceport-key"),
