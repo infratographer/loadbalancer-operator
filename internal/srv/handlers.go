@@ -57,6 +57,7 @@ func (s *Server) processEvent(ctx context.Context, msg events.Message[events.Eve
 			switch {
 			case m.EventType == "ip-address.assigned":
 				s.Logger.Debugw("ip address processed. updating loadbalancer", "loadbalancer", lb.loadBalancerID.String())
+
 				if err := s.createDeployment(ctx, lb); err != nil {
 					s.Logger.Errorw("unable to update loadbalancer", "error", err, "messageID", msg.ID(), "loadbalancer", lb.loadBalancerID.String())
 				}
