@@ -44,12 +44,6 @@ func init() {
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.loadbalanceroperator.yaml)")
 
-	rootCmd.PersistentFlags().Bool("debug", false, "enable debug logging")
-	viperx.MustBindFlag(viper.GetViper(), "debug", rootCmd.PersistentFlags().Lookup("debug"))
-
-	rootCmd.PersistentFlags().Bool("pretty", false, "enable pretty (human readable) logging output")
-	viperx.MustBindFlag(viper.GetViper(), "logging.pretty", rootCmd.PersistentFlags().Lookup("pretty"))
-
 	rootCmd.PersistentFlags().String("healthcheck-port", ":8080", "port to run healthcheck probe on")
 	viperx.MustBindFlag(viper.GetViper(), "healthcheck-port", rootCmd.PersistentFlags().Lookup("healthcheck-port"))
 
