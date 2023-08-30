@@ -7,6 +7,7 @@ import (
 	"go.infratographer.com/x/gidx"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 	"golang.org/x/exp/slices"
 )
 
@@ -67,6 +68,12 @@ func (s *Server) processEvent(msg events.Message[events.EventMessage]) {
 			}
 		}
 	}
+
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+	}
+
 	// we need to Acknowledge that we received and processed the message,
 	// otherwise, it will be resent over and over again.
 	if err := msg.Ack(); err != nil {
@@ -127,6 +134,12 @@ func (s *Server) processChange(msg events.Message[events.ChangeMessage]) {
 			}
 		}
 	}
+
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+	}
+
 	// we need to Acknowledge that we received and processed the message,
 	// otherwise, it will be resent over and over again.
 	if err := msg.Ack(); err != nil {
