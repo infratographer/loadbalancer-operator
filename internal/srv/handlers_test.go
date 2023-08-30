@@ -108,7 +108,7 @@ func (suite *srvTestSuite) TestProcessChange() { //nolint:govet
 		utils.ErrPanic("unable to configure subscribers", err)
 	}
 
-	go srv.listenChange(context.TODO(), srv.changeChannels[0])
+	go srv.listenChange(srv.changeChannels[0])
 	// TODO: check that namespace exists
 	// TODO: check that release exists
 
@@ -203,7 +203,7 @@ func (suite *srvTestSuite) TestProcessEvent() { //nolint:govet
 
 	_ = srv.configureSubscribers(context.TODO())
 
-	go srv.listenEvent(context.TODO(), srv.eventChannels[0])
+	go srv.listenEvent(srv.eventChannels[0])
 
 	_, err = srv.EventsConnection.PublishEvent(context.TODO(), "load-balancer-event", events.EventMessage{
 		EventType:            "update",

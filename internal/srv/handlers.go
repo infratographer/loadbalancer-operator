@@ -1,7 +1,6 @@
 package srv
 
 import (
-	"context"
 	"strings"
 
 	"go.infratographer.com/x/events"
@@ -21,13 +20,13 @@ func (s *Server) locationCheck(i gidx.PrefixedID) bool {
 	return false
 }
 
-func (s *Server) listenEvent(ctx context.Context, messages <-chan events.Message[events.EventMessage]) {
+func (s *Server) listenEvent(messages <-chan events.Message[events.EventMessage]) {
 	for msg := range messages {
-		s.processEvent(ctx, msg)
+		s.processEvent(msg)
 	}
 }
 
-func (s *Server) processEvent(ctx context.Context, msg events.Message[events.EventMessage]) {
+func (s *Server) processEvent(msg events.Message[events.EventMessage]) {
 	var lb *loadBalancer
 
 	var err error
@@ -36,7 +35,7 @@ func (s *Server) processEvent(ctx context.Context, msg events.Message[events.Eve
 	s.Logger.Infow("messageType", "event", "messageID", msg.ID())
 	s.Logger.Debugw("messageType", "event", "messageID", msg.ID(), "data", m)
 
-	ctx, span := otel.Tracer(instrumentationName).Start(m.GetTraceContext(ctx), "processEvent")
+	ctx, span := otel.Tracer(instrumentationName).Start(m.GetTraceContext(s.Context), "processEvent")
 	defer span.End()
 
 	span.SetAttributes(
@@ -75,20 +74,20 @@ func (s *Server) processEvent(ctx context.Context, msg events.Message[events.Eve
 	}
 }
 
-func (s *Server) listenChange(ctx context.Context, messages <-chan events.Message[events.ChangeMessage]) {
+func (s *Server) listenChange(messages <-chan events.Message[events.ChangeMessage]) {
 	for msg := range messages {
-		s.processChange(ctx, msg)
+		s.processChange(msg)
 	}
 }
 
-func (s *Server) processChange(ctx context.Context, msg events.Message[events.ChangeMessage]) {
+func (s *Server) processChange(msg events.Message[events.ChangeMessage]) {
 	var lb *loadBalancer
 
 	var err error
 
 	m := msg.Message()
 
-	ctx, span := otel.Tracer(instrumentationName).Start(m.GetTraceContext(ctx), "processChange")
+	ctx, span := otel.Tracer(instrumentationName).Start(m.GetTraceContext(s.Context), "processChange")
 	defer span.End()
 
 	span.SetAttributes(

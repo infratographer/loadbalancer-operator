@@ -59,11 +59,11 @@ func (s *Server) Run(ctx context.Context) error {
 	}
 
 	for _, ch := range s.changeChannels {
-		go s.listenChange(ctx, ch)
+		go s.listenChange(ch)
 	}
 
 	for _, ev := range s.eventChannels {
-		go s.listenEvent(ctx, ev)
+		go s.listenEvent(ev)
 	}
 
 	return nil
