@@ -56,7 +56,7 @@ func (s *Server) processEvent(msg events.Message[events.EventMessage]) {
 			attribute.String("message.subject", m.SubjectID.String()),
 		)
 
-		if lb != nil && lb.lbType != typeNoLB {
+		if err != nil && lb.lbType != typeNoLB {
 			switch {
 			case m.EventType == "ip-address.assigned":
 				s.Logger.Debugw("ip address processed. updating loadbalancer", "loadbalancer", lb.loadBalancerID.String())
@@ -117,7 +117,7 @@ func (s *Server) processChange(msg events.Message[events.ChangeMessage]) {
 			attribute.String("message.subject", m.SubjectID.String()),
 		)
 
-		if lb != nil && lb.lbType != typeNoLB {
+		if err != nil && lb.lbType != typeNoLB {
 			switch {
 			case m.EventType == string(events.CreateChangeType) && lb.lbType == typeLB:
 				s.Logger.Debugw("creating loadbalancer", "loadbalancer", lb.loadBalancerID.String())
