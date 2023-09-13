@@ -28,7 +28,7 @@ func (s *Server) removeNamespace(ctx context.Context, ns string) error {
 	kc, err := kubernetes.NewForConfig(s.KubeClient)
 
 	if err != nil {
-		s.Logger.Errorw("unable to authenticate against kubernetes cluster", "error", err)
+		s.Logger.Warnw("unable to authenticate against kubernetes cluster", "error", err)
 		return err
 	}
 
@@ -121,7 +121,7 @@ func (s *Server) newDeployment(ctx context.Context, lb *loadBalancer) error {
 	hash := hashLBName(lb.loadBalancerID.String())
 
 	if _, err := s.CreateNamespace(ctx, hash); err != nil {
-		s.Logger.Errorw("unable to create namespace", "error", err, "namespace", hash, "loadBalancer", lb.loadBalancerID.String())
+		s.Logger.Warnw("unable to create namespace", "error", err, "namespace", hash, "loadBalancer", lb.loadBalancerID.String())
 		return err
 	}
 
@@ -132,13 +132,13 @@ func (s *Server) newDeployment(ctx context.Context, lb *loadBalancer) error {
 
 	values, err := s.newHelmValues(lb)
 	if err != nil {
-		s.Logger.Errorw("unable to prepare chart values", "error", err, "loadBalancer", lb.loadBalancerID.String(), "namespace", hash)
+		s.Logger.Warnw("unable to prepare chart values", "error", err, "loadBalancer", lb.loadBalancerID.String(), "namespace", hash)
 		return err
 	}
 
 	client, err := s.newHelmClient(hash)
 	if err != nil {
-		s.Logger.Errorw("unable to initialize helm client", "err", err, "loadBalancer", lb.loadBalancerID.String(), "namespace", hash)
+		s.Logger.Warnw("unable to initialize helm client", "err", err, "loadBalancer", lb.loadBalancerID.String(), "namespace", hash)
 		return err
 	}
 
@@ -153,7 +153,7 @@ func (s *Server) newDeployment(ctx context.Context, lb *loadBalancer) error {
 	case driver.ErrReleaseExists:
 		s.Logger.Debugw("loadbalancer already exists, proceeding to upgrade...", "namespace", hash, "releaseName", releaseName, "loadBalancer", lb.loadBalancerID.String())
 	default:
-		s.Logger.Errorw("unable to deploy loadbalancer", "error", err, "namespace", hash, "releaseName", releaseName, "loadBalancer", lb.loadBalancerID.String())
+		s.Logger.Warnw("unable to deploy loadbalancer", "error", err, "namespace", hash, "releaseName", releaseName, "loadBalancer", lb.loadBalancerID.String())
 		return err
 	}
 
@@ -173,13 +173,13 @@ func (s *Server) updateDeployment(ctx context.Context, lb *loadBalancer) error {
 
 	values, err := s.newHelmValues(lb)
 	if err != nil {
-		s.Logger.Errorw("unable to prepare chart values", "error", err, "loadBalancer", lb.loadBalancerID.String())
+		s.Logger.Warnw("unable to prepare chart values", "error", err, "loadBalancer", lb.loadBalancerID.String())
 		return err
 	}
 
 	client, err := s.newHelmClient(hash)
 	if err != nil {
-		s.Logger.Errorw("unable to initialize helm client", "error", err, "loadBalancer", lb.loadBalancerID.String())
+		s.Logger.Warnw("unable to initialize helm client", "error", err, "loadBalancer", lb.loadBalancerID.String())
 		return err
 	}
 
@@ -192,7 +192,7 @@ func (s *Server) updateDeployment(ctx context.Context, lb *loadBalancer) error {
 		return err
 	}
 
-	s.Logger.Infow("loadbalancer upgraded successfully", "namespace", hash, "releaseName", releaseName, "loadBalancer", lb.loadBalancerID.String())
+	s.Logger.Debugw("loadbalancer upgraded successfully", "namespace", hash, "releaseName", releaseName, "loadBalancer", lb.loadBalancerID.String())
 
 	return nil
 }
@@ -210,7 +210,7 @@ func (s *Server) removeDeployment(ctx context.Context, lb *loadBalancer) error {
 
 	client, err := s.newHelmClient(hash)
 	if err != nil {
-		s.Logger.Errorw("unable to initialize helm client", "error", err, "loadBalancer", lb.loadBalancerID.String(), "namespace", hash, "releaseName", releaseName)
+		s.Logger.Debugw("unable to initialize helm client", "error", err, "loadBalancer", lb.loadBalancerID.String(), "namespace", hash, "releaseName", releaseName)
 		return err
 	}
 
@@ -218,19 +218,19 @@ func (s *Server) removeDeployment(ctx context.Context, lb *loadBalancer) error {
 	_, err = hc.Run(releaseName)
 
 	if err != nil {
-		s.Logger.Errorw("unable to remove loadBalancer", "error", err, "releaseName", releaseName, "loadBalancer", lb.loadBalancerID.String(), "namespace", hash)
+		s.Logger.Debugw("unable to remove loadBalancer", "error", err, "releaseName", releaseName, "loadBalancer", lb.loadBalancerID.String(), "namespace", hash)
 		return err
 	}
 
-	s.Logger.Infow("loadbalancer removed successfully", "releaseName", releaseName, "loadBalancer", lb.loadBalancerID.String())
+	s.Logger.Debugw("loadbalancer removed successfully", "releaseName", releaseName, "loadBalancer", lb.loadBalancerID.String())
 
 	err = s.removeNamespace(ctx, hash)
 	if err != nil {
-		s.Logger.Errorw("unable to remove namespace", "error", err, "namespace", hash, "loadBalancer", lb.loadBalancerID.String())
+		s.Logger.Debugw("unable to remove namespace", "error", err, "namespace", hash, "loadBalancer", lb.loadBalancerID.String())
 		return err
 	}
 
-	s.Logger.Infow("namespace removed successfully", "namespace", hash, "loadBalancer", lb.loadBalancerID.String())
+	s.Logger.Debugw("namespace removed successfully", "namespace", hash, "loadBalancer", lb.loadBalancerID.String())
 
 	return nil
 }
@@ -284,8 +284,6 @@ func (s *Server) createDeployment(ctx context.Context, lb *loadBalancer) error {
 			s.Logger.Debugw("unable to update loadbalancer, retrying...", "error", err, "loadBalancer", lb.loadBalancerID.String())
 		}
 	}
-
-	s.Logger.Errorw("failed to update loadbalancer", "error", err, "loadBalancer", lb.loadBalancerID.String())
 
 	return err
 }

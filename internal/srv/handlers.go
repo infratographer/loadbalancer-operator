@@ -43,7 +43,7 @@ func (s *Server) processEvent(msg events.Message[events.EventMessage]) {
 		} else {
 			lb, err = s.newLoadBalancer(ctx, m.SubjectID, m.AdditionalSubjectIDs)
 			if err != nil {
-				s.Logger.Errorw("unable to initialize loadbalancer", "error", err, "messageID", msg.ID(), "loadbalancerID", m.SubjectID.String())
+				s.Logger.Warnw("unable to initialize loadbalancer", "error", err, "messageID", msg.ID(), "loadbalancerID", m.SubjectID.String())
 			}
 		}
 
