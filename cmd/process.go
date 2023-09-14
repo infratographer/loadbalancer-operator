@@ -227,7 +227,7 @@ func validateFlags() error {
 func loadHelmChart(chartPath string) (*chart.Chart, error) {
 	chart, err := loader.Load(chartPath)
 	if err != nil {
-		logger.Debugw("failed to load helm chart", "error", err)
+		logger.Errorw("failed to load helm chart", "error", err)
 
 		return nil, errors.Join(err, errInvalidHelmChart)
 	}
