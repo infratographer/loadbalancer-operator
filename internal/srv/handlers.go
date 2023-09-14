@@ -33,8 +33,6 @@ func (s *Server) processEvent(msg events.Message[events.EventMessage]) {
 	var err error
 
 	m := msg.Message()
-	s.Logger.Infow("messageType", "event", "messageID", msg.ID())
-	s.Logger.Debugw("messageType", "event", "messageID", msg.ID(), "data", m)
 
 	ctx, span := otel.Tracer(instrumentationName).Start(m.GetTraceContext(s.Context), "processEvent")
 	defer span.End()
