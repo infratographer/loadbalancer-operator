@@ -22,16 +22,6 @@ type loadBalancer struct {
 	lbType         int
 }
 
-type runner struct {
-	reader     chan *lbTask
-	writer     chan *lbTask
-	quit       chan struct{}
-	buffer     []*lbTask
-	taskRunner func(*lbTask)
-}
-
-type taskRunner func(*lbTask)
-
 type Message interface {
 	events.EventMessage | events.ChangeMessage
 	GetTraceContext(ctx context.Context) context.Context
