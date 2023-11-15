@@ -5,7 +5,7 @@ import (
 )
 
 // runner is a struct that manages the flow of messages for a given loadbalancer
-// seperate reader and writer channels are utilized in conjunction with a buffer
+// separate reader and writer channels are utilized in conjunction with a buffer
 // to ensure that messages are processed as they are received without blocking
 // while the buffer is utilized in order to ensure that only a single message for
 // a given loadbalancer is processed at one time
