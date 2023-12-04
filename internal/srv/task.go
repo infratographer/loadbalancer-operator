@@ -2,11 +2,6 @@ package srv
 
 import (
 	"context"
-	"time"
-)
-
-const (
-	lbCleanupCooldown = 5
 )
 
 // runner is a struct that manages the flow of messages for a given loadbalancer
@@ -46,13 +41,6 @@ func (r *runner) run() {
 	for {
 		select {
 		case <-r.quit:
-			for {
-				if len(r.buffer) == 0 {
-					time.Sleep(lbCleanupCooldown * time.Second)
-					break
-				}
-			}
-
 			return
 		default:
 			if len(r.buffer) > 0 {
