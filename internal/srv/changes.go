@@ -11,7 +11,8 @@ func (s *Server) processLoadBalancerChangeCreate(ctx context.Context, lb *loadBa
 	if err := s.createDeployment(ctx, lb); err != nil {
 		return err
 	}
-	numberLoadBalancersRequestedGauge.Inc()
+
+	numberLoadBalancersCreatedGauge.Inc()
 
 	return nil
 }
@@ -25,7 +26,8 @@ func (s *Server) processLoadBalancerChangeDelete(ctx context.Context, lb *loadBa
 
 		return err
 	}
-	numberLoadBalancersRequestedGauge.Dec()
+
+	numberLoadBalancersDeletedGauge.Inc()
 
 	return nil
 }

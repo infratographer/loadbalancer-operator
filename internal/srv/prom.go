@@ -7,10 +7,19 @@ import (
 
 const subsystem = "load_balancer_operator"
 
-var numberLoadBalancersRequestedGauge = promauto.NewGauge(
-	prometheus.GaugeOpts{
-		Subsystem: subsystem,
-		Name:      "load_balancers_count",
-		Help:      "Total count of currently deployed load balancers",
-	},
+var (
+	numberLoadBalancersCreatedGauge = promauto.NewGauge(
+		prometheus.GaugeOpts{
+			Subsystem: subsystem,
+			Name:      "load_balancers_created",
+			Help:      "Total count of load balancers created",
+		},
+	)
+	numberLoadBalancersDeletedGauge = promauto.NewGauge(
+		prometheus.GaugeOpts{
+			Subsystem: subsystem,
+			Name:      "load_balancers_deleted",
+			Help:      "Total count of load balancers deleted",
+		},
+	)
 )
