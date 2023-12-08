@@ -751,6 +751,8 @@ go.etcd.io/etcd/client/pkg/v3 v3.5.0/go.mod h1:IJHfcCEKxYu1Os13ZdwCwIUTUVGYTSAM3
 go.etcd.io/etcd/client/v2 v2.305.0/go.mod h1:h9puh54ZTgAKtEbut2oe9P4L/oqKCVB6xsXlzd7alYQ=
 go.infratographer.com/ipam-api v0.0.3-0.20230627135853-8acda8f15bbe h1:FEVVwb8uQyhHnS/JPLiESecdtbePQ44hss7GiG0xI4o=
 go.infratographer.com/ipam-api v0.0.3-0.20230627135853-8acda8f15bbe/go.mod h1:AYzfwMo3pcgtc/9FbkJIJ0XYsGFCYoKOmeriwEp3pzk=
+go.infratographer.com/ipam-api v0.0.4 h1:MDCHXJcl9o4XcM/Lu0xUxkrYEYzIfmtvCEcTuJebb5s=
+go.infratographer.com/ipam-api v0.0.4/go.mod h1:thDypoVMMbTmR1cpOkT2yMNylC/QB233Slm7XTwxc4g=
 go.infratographer.com/load-balancer-api v0.0.26-0.20230907183148-881485c02423 h1:8NOnc6TJ5YnW9N6VcEwFrR50oKDff/pxPjYTlNTl18Q=
 go.infratographer.com/load-balancer-api v0.0.26-0.20230907183148-881485c02423/go.mod h1:bg/+0/C+LJAKDsDpzm1IeeBTlC/MMO130z4Eh20nwhw=
 go.opencensus.io v0.21.0/go.mod h1:mSImk1erAIZhrmZN+AvHh14ztQfjbGwt4TtuofqLduU=
