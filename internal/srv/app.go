@@ -252,7 +252,7 @@ func hashLBName(name string) string {
 
 func (s *Server) createDeployment(ctx context.Context, lb *loadBalancer) error {
 	if !slices.Contains(s.Locations, lb.lbData.Location.ID) {
-		s.Logger.Warn("loadbalancer location is not in operator locations, skipping...", "location", lb.lbData.Location, "loadBalancer", lb.loadBalancerID)
+		s.Logger.Warn("load-balancer location not found in operator watch locations, skipping...", "location", lb.lbData.Location.ID, "loadBalancer", lb.loadBalancerID)
 		return nil
 	}
 
