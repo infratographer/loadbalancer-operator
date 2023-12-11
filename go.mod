@@ -1,6 +1,8 @@
 module go.infratographer.com/load-balancer-operator
 
-go 1.20
+go 1.21
+
+toolchain go1.21.5
 
 replace (
 	github.com/docker/cli => github.com/docker/cli v20.10.19+incompatible
@@ -157,7 +159,7 @@ require (
 	github.com/gobuffalo/packr/v2 v2.8.3
 	github.com/labstack/echo/v4 v4.11.3
 	go.infratographer.com/ipam-api v0.0.4
-	go.infratographer.com/load-balancer-api v0.0.36-0.20231201160449-63fdc7abfac5
+	go.infratographer.com/load-balancer-api v0.0.36-0.20231211204446-627379f87805
 	go.infratographer.com/metadata-api v0.0.4-0.20231117162412-b428513be7b6
 	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa
 	sigs.k8s.io/controller-runtime v0.14.5
