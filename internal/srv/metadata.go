@@ -3,7 +3,10 @@ package srv
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"time"
 
+	"go.infratographer.com/x/events"
 	"go.infratographer.com/x/gidx"
 
 	metastatus "go.infratographer.com/load-balancer-api/pkg/metadata"
@@ -24,6 +27,10 @@ func (s Server) LoadBalancerStatusUpdate(ctx context.Context, loadBalancerID gid
 		return err
 	}
 
+	if err := s.updateMetering(ctx, loadBalancerID, status); err != nil {
+		return err
+	}
+
 	if _, err := s.MetadataClient.StatusUpdate(ctx, &metacli.StatusUpdateInput{
 		NodeID:      loadBalancerID.String(),
 		NamespaceID: config.AppConfig.Metadata.StatusNamespaceID.String(),
@@ -31,6 +38,33 @@ func (s Server) LoadBalancerStatusUpdate(ctx context.Context, loadBalancerID gid
 		Data:        json.RawMessage(jsonBytes),
 	}); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (s Server) updateMetering(ctx context.Context, loadBalancerID gidx.PrefixedID, status *metastatus.LoadBalancerStatus) error {
+	if s.MeteringSubject == "" {
+		s.Logger.Warnln("metering subject not configured")
+		return nil
+	}
+
+	if status.State == metastatus.LoadBalancerStateDeleted || status.State == metastatus.LoadBalancerStateActive {
+		eventType := "metadata.status"
+		if status.State == metastatus.LoadBalancerStateDeleted {
+			eventType += ".deleted"
+		} else {
+			eventType += ".active"
+		}
+
+		msg := events.ChangeMessage{
+			EventType: eventType,
+			SubjectID: loadBalancerID,
+			Timestamp: time.Now().UTC(),
+		}
+		if _, err := s.EventsConnection.PublishChange(ctx, s.MeteringSubject, msg); err != nil {
+			return fmt.Errorf("failed to publish change: %w", err)
+		}
 	}
 
 	return nil
