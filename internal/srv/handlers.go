@@ -202,7 +202,7 @@ func process(t *lbTask) {
 			t.srv.Logger.Errorw("handler unable to create loadbalancer", "error", err, "loadbalancer", t.lb.loadBalancerID)
 		} else {
 			sts := &lbmeta.LoadBalancerStatus{State: lbmeta.LoadBalancerStateActive}
-			if err := t.srv.LoadBalancerStatusUpdate(t.ctx, t.lb.loadBalancerID, sts); err != nil {
+			if err := t.srv.LoadBalancerStatusUpdate(t.ctx, t.lb.loadBalancerID, status, sts); err != nil {
 				t.srv.Logger.Errorw("failed to update metadata", "error", err, "loadbalancer", t.lb.loadBalancerID, "loadbalancerState", sts.State)
 			}
 		}
@@ -216,7 +216,7 @@ func process(t *lbTask) {
 		}
 
 		sts := &lbmeta.LoadBalancerStatus{State: lbmeta.LoadBalancerStateDeleted}
-		if err := t.srv.LoadBalancerStatusUpdate(t.ctx, t.lb.loadBalancerID, sts); err != nil {
+		if err := t.srv.LoadBalancerStatusUpdate(t.ctx, t.lb.loadBalancerID, status, sts); err != nil {
 			t.srv.Logger.Errorw("failed to update metadata", "error", err, "loadbalancer", t.lb.loadBalancerID, "loadbalancerState", sts.State)
 		}
 

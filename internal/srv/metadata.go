@@ -16,18 +16,18 @@ import (
 )
 
 // LoadBalancerStatusUpdate updates the state of a load balancer in the metadata service
-func (s Server) LoadBalancerStatusUpdate(ctx context.Context, loadBalancerID gidx.PrefixedID, status *metastatus.LoadBalancerStatus) error {
+func (s Server) LoadBalancerStatusUpdate(ctx context.Context, loadBalancerID gidx.PrefixedID, oldStatus *metastatus.LoadBalancerStatus, newStatus *metastatus.LoadBalancerStatus) error {
 	if config.AppConfig.Metadata.Endpoint == "" {
 		s.Logger.Warnln("metadata not configured")
 		return nil
 	}
 
-	jsonBytes, err := json.Marshal(status)
+	jsonBytes, err := json.Marshal(newStatus)
 	if err != nil {
 		return err
 	}
 
-	if err := s.updateMetering(ctx, loadBalancerID, status); err != nil {
+	if err := s.updateMetering(ctx, loadBalancerID, oldStatus, newStatus); err != nil {
 		return err
 	}
 
@@ -43,24 +43,28 @@ func (s Server) LoadBalancerStatusUpdate(ctx context.Context, loadBalancerID gid
 	return nil
 }
 
-func (s Server) updateMetering(ctx context.Context, loadBalancerID gidx.PrefixedID, status *metastatus.LoadBalancerStatus) error {
+func (s Server) updateMetering(ctx context.Context, loadBalancerID gidx.PrefixedID, oldStatus *metastatus.LoadBalancerStatus, newStatus *metastatus.LoadBalancerStatus) error {
 	if s.MeteringSubject == "" {
 		s.Logger.Warnln("metering subject not configured")
 		return nil
 	}
 
-	if status.State == metastatus.LoadBalancerStateDeleted || status.State == metastatus.LoadBalancerStateActive {
-		eventType := "metadata.status"
-		if status.State == metastatus.LoadBalancerStateDeleted {
-			eventType += ".deleted"
-		} else {
-			eventType += ".active"
+	if newStatus.State == metastatus.LoadBalancerStateDeleted || newStatus.State == metastatus.LoadBalancerStateActive {
+		changeset := []events.FieldChange{
+			{
+				Field:         "metadata_status",
+				PreviousValue: string(oldStatus.State),
+				CurrentValue:  string(newStatus.State),
+			},
 		}
 
+		eventType := "metadata.update"
+
 		msg := events.ChangeMessage{
-			EventType: eventType,
-			SubjectID: loadBalancerID,
-			Timestamp: time.Now().UTC(),
+			EventType:    eventType,
+			SubjectID:    loadBalancerID,
+			Timestamp:    time.Now().UTC(),
+			FieldChanges: changeset,
 		}
 		if _, err := s.EventsConnection.PublishChange(ctx, s.MeteringSubject, msg); err != nil {
 			return fmt.Errorf("failed to publish change: %w", err)
