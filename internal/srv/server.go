@@ -34,7 +34,6 @@ type Server struct {
 	Debug            bool
 	EventTopics      []string
 	ChangeTopics     []string
-	MeteringSubject  string
 	Chart            *chart.Chart
 	ChartPath        string
 	ValuesPath       string

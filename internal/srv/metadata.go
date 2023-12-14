@@ -16,18 +16,19 @@ import (
 )
 
 // LoadBalancerStatusUpdate updates the state of a load balancer in the metadata service
-func (s Server) LoadBalancerStatusUpdate(ctx context.Context, loadBalancerID gidx.PrefixedID, oldStatus *metastatus.LoadBalancerStatus, newStatus *metastatus.LoadBalancerStatus) error {
+func (s Server) LoadBalancerStatusUpdate(ctx context.Context, loadBalancerID gidx.PrefixedID, status *metastatus.LoadBalancerStatus) error {
+	// publish event even if metadata endpoint is not configured
+	if err := s.publishLoadBalancerMetadata(ctx, loadBalancerID, status); err != nil {
+		return err
+	}
+
 	if config.AppConfig.Metadata.Endpoint == "" {
 		s.Logger.Warnln("metadata not configured")
 		return nil
 	}
 
-	jsonBytes, err := json.Marshal(newStatus)
+	jsonBytes, err := json.Marshal(status)
 	if err != nil {
-		return err
-	}
-
-	if err := s.updateMetering(ctx, loadBalancerID, oldStatus, newStatus); err != nil {
 		return err
 	}
 
@@ -43,32 +44,31 @@ func (s Server) LoadBalancerStatusUpdate(ctx context.Context, loadBalancerID gid
 	return nil
 }
 
-func (s Server) updateMetering(ctx context.Context, loadBalancerID gidx.PrefixedID, oldStatus *metastatus.LoadBalancerStatus, newStatus *metastatus.LoadBalancerStatus) error {
-	if s.MeteringSubject == "" {
-		s.Logger.Warnln("metering subject not configured")
+func (s Server) publishLoadBalancerMetadata(ctx context.Context, loadBalancerID gidx.PrefixedID, status *metastatus.LoadBalancerStatus) error {
+	eventType := "metadata"
+
+	subject := "load-balancer"
+
+	switch status.State {
+	case metastatus.LoadBalancerStateDeleted:
+		subject += ".deleted"
+	case metastatus.LoadBalancerStateActive:
+		subject += ".active"
+	default:
+		s.Logger.Debugf("skipping publish message for status: %s", string(status.State))
 		return nil
 	}
 
-	if newStatus.State == metastatus.LoadBalancerStateDeleted || newStatus.State == metastatus.LoadBalancerStateActive {
-		changeset := []events.FieldChange{
-			{
-				Field:         "metadata_status",
-				PreviousValue: string(oldStatus.State),
-				CurrentValue:  string(newStatus.State),
-			},
-		}
+	msg := events.EventMessage{
+		EventType: eventType,
+		SubjectID: loadBalancerID,
+		Source:    config.AppConfig.Metadata.Source,
+		Timestamp: time.Now().UTC(),
+	}
 
-		eventType := "metadata.update"
-
-		msg := events.ChangeMessage{
-			EventType:    eventType,
-			SubjectID:    loadBalancerID,
-			Timestamp:    time.Now().UTC(),
-			FieldChanges: changeset,
-		}
-		if _, err := s.EventsConnection.PublishChange(ctx, s.MeteringSubject, msg); err != nil {
-			return fmt.Errorf("failed to publish change: %w", err)
-		}
+	// full topic = cfg.PublisherPrefix + "events" + eventType + subject
+	if _, err := s.EventsConnection.PublishEvent(ctx, subject, msg); err != nil {
+		return fmt.Errorf("failed to publish event: %w", err)
 	}
 
 	return nil
