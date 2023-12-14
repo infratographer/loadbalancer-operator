@@ -80,9 +80,6 @@ func init() {
 	processCmd.PersistentFlags().StringSlice("event-topics", nil, "event topics to subscribe to")
 	viperx.MustBindFlag(viper.GetViper(), "event-topics", processCmd.PersistentFlags().Lookup("event-topics"))
 
-	processCmd.PersistentFlags().String("metering-subject", "", "metering subject to publish to")
-	viperx.MustBindFlag(viper.GetViper(), "metering-subject", processCmd.PersistentFlags().Lookup("metering-subject"))
-
 	processCmd.PersistentFlags().String("kube-config-path", "", "path to a valid kubeconfig file")
 	viperx.MustBindFlag(viper.GetViper(), "kube-config-path", processCmd.PersistentFlags().Lookup("kube-config-path"))
 

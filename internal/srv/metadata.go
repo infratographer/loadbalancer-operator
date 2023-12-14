@@ -3,7 +3,6 @@ package srv
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"go.infratographer.com/x/events"
@@ -19,7 +18,7 @@ import (
 func (s Server) LoadBalancerStatusUpdate(ctx context.Context, loadBalancerID gidx.PrefixedID, status *metastatus.LoadBalancerStatus) error {
 	// publish event even if metadata endpoint is not configured
 	if err := s.publishLoadBalancerMetadata(ctx, loadBalancerID, status); err != nil {
-		return err
+		s.Logger.Warnf("Failed to publish event: %w", err)
 	}
 
 	if config.AppConfig.Metadata.Endpoint == "" {
@@ -68,7 +67,7 @@ func (s Server) publishLoadBalancerMetadata(ctx context.Context, loadBalancerID 
 
 	// full topic = cfg.PublisherPrefix + "events" + eventType + subject
 	if _, err := s.EventsConnection.PublishEvent(ctx, subject, msg); err != nil {
-		return fmt.Errorf("failed to publish event: %w", err)
+		return err
 	}
 
 	return nil
