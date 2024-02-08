@@ -11,8 +11,6 @@ import (
 	"go.uber.org/zap"
 	"helm.sh/helm/v3/pkg/chart"
 	"k8s.io/client-go/rest"
-
-	"go.infratographer.com/ipam-api/pkg/ipamclient"
 )
 
 // instrumentationName is a unique package name used for tracing
@@ -22,7 +20,6 @@ const instrumentationName = "go.infratographer.com/load-balancer-operator/srv"
 type Server struct {
 	APIClient        *lbapi.Client
 	BackoffConfig    backoff.Policy
-	IPAMClient       *ipamclient.Client
 	MetadataClient   *metadata.Client
 	Echo             *echox.Server
 	Context          context.Context

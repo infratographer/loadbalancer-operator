@@ -17,7 +17,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"go.infratographer.com/ipam-api/pkg/ipamclient"
 	lbapi "go.infratographer.com/load-balancer-api/pkg/client"
 	metadata "go.infratographer.com/metadata-api/pkg/client"
 	"go.infratographer.com/x/echox"
@@ -58,9 +57,6 @@ func init() {
 
 	processCmd.PersistentFlags().String("api-endpoint", "http://localhost:7608", "endpoint for load balancer API. defaults to supergraph if set")
 	viperx.MustBindFlag(viper.GetViper(), "api-endpoint", processCmd.PersistentFlags().Lookup("api-endpoint"))
-
-	processCmd.PersistentFlags().String("ipam-endpoint", "http://localhost:7905", "endpoint for ipam API. defaults to supergraph if set.")
-	viperx.MustBindFlag(viper.GetViper(), "ipam-endpoint", processCmd.PersistentFlags().Lookup("ipam-endpoint"))
 
 	processCmd.PersistentFlags().String("supergraph-endpoint", "", "endpoint for supergraph gateway")
 	viperx.MustBindFlag(viper.GetViper(), "supergraph-endpoint", processCmd.PersistentFlags().Lookup("supergraph-endpoint"))
@@ -175,13 +171,11 @@ func process(ctx context.Context, logger *zap.SugaredLogger) error {
 
 		oauthHTTPClient := oauth2x.NewClient(ctx, oidcTS)
 		server.APIClient = lbapi.NewClient(viper.GetString("supergraph-endpoint"), lbapi.WithHTTPClient(oauthHTTPClient))
-		server.IPAMClient = ipamclient.NewClient(viper.GetString("supergraph-endpoint"), ipamclient.WithHTTPClient(oauthHTTPClient))
 		server.MetadataClient = metadata.New(config.AppConfig.Metadata.Endpoint,
 			metadata.WithHTTPClient(oauthHTTPClient),
 		)
 	} else {
 		server.APIClient = lbapi.NewClient(viper.GetString("supergraph-endpoint"))
-		server.IPAMClient = ipamclient.NewClient(viper.GetString("supergraph-endpoint"))
 		server.MetadataClient = metadata.New(config.AppConfig.Metadata.Endpoint)
 	}
 

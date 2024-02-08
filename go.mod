@@ -156,7 +156,6 @@ require (
 require (
 	github.com/gobuffalo/packr/v2 v2.8.3
 	github.com/labstack/echo/v4 v4.11.3
-	go.infratographer.com/ipam-api v0.0.4
 	go.infratographer.com/load-balancer-api v0.0.36-0.20231201160449-63fdc7abfac5
 	go.infratographer.com/metadata-api v0.0.4-0.20231117162412-b428513be7b6
 	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa
@@ -164,7 +163,6 @@ require (
 )
 
 require (
-	github.com/3th1nk/cidr v0.2.0 // indirect
 	github.com/Microsoft/hcsshim v0.11.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/containerd/continuity v0.4.3 // indirect
@@ -180,7 +178,6 @@ require (
 	github.com/sagikazarmark/locafero v0.3.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
 	github.com/sergi/go-diff v1.3.1 // indirect
-	github.com/shurcooL/graphql v0.0.0-20230714182844-3e04114ae69a // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/stretchr/objx v0.5.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.46.1 // indirect
