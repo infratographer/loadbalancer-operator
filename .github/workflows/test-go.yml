@@ -18,13 +18,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-     
+
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
           go-version-file: 'go.mod'
 
-      - uses: tylerauerbeck/envtest-action@main
+      - uses: rizzza/envtest-action@patch-1
         env:
           KUBERNETES_VERSION: ${{ matrix.k8s-version }}
         with:

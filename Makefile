@@ -4,6 +4,7 @@ PHONY: help all tests coverage lint golint clean binary go-run vendor unit-tests
 GOOS=linux
 
 APP_NAME=loadbalanceroperator
+KUBERNETES_VERSION=1.27
 
 help: Makefile ## Print help
 	@grep -h "##" $(MAKEFILE_LIST) | grep -v grep | sed -e 's/:.*##/#/' | column -c 2 -t -s#
@@ -13,7 +14,7 @@ tests: | unit-tests
 unit-tests: ## Runs unit tests
 	@echo --- Running unit tests...
 	@date -Iseconds
-	@go test -race -cover -failfast -tags testtools -p 1 -v ./...
+	KUBEBUILDER_ASSETS=$(shell setup-envtest use ${KUBERNETES_VERSION} -p path) go test -race -cover -failfast -tags testtools -p 1 -v ./...
 
 coverage: ## Generates coverage report
 	@echo --- Generating coverage report...

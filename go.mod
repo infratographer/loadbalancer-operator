@@ -1,6 +1,6 @@
 module go.infratographer.com/load-balancer-operator
 
-go 1.21
+go 1.22
 
 replace (
 	github.com/docker/cli => github.com/docker/cli v20.10.19+incompatible
@@ -106,7 +106,7 @@ require (
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
-	github.com/prometheus/client_golang v1.17.0 // indirect
+	github.com/prometheus/client_golang v1.17.0
 	github.com/prometheus/client_model v0.5.0 // indirect
 	github.com/prometheus/common v0.45.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
@@ -155,6 +155,7 @@ require (
 
 require (
 	github.com/gobuffalo/packr/v2 v2.8.3
+	github.com/hasura/go-graphql-client v0.10.0
 	github.com/labstack/echo/v4 v4.11.3
 	go.infratographer.com/ipam-api v0.0.4
 	go.infratographer.com/load-balancer-api v0.0.36-0.20231201160449-63fdc7abfac5
@@ -174,7 +175,6 @@ require (
 	github.com/gobwas/ws v1.0.4 // indirect
 	github.com/google/gnostic-models v0.6.8 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.18.1 // indirect
-	github.com/hasura/go-graphql-client v0.10.0 // indirect
 	github.com/lestrrat-go/option v1.0.0 // indirect
 	github.com/matttproud/golang_protobuf_extensions/v2 v2.0.0 // indirect
 	github.com/sagikazarmark/locafero v0.3.0 // indirect

@@ -1,11 +1,11 @@
-ARG GO_VERSION=1.21
+ARG GO_VERSION=1.22
 
 FROM nats:latest as NATS
 
 FROM mcr.microsoft.com/vscode/devcontainers/go:1-${GO_VERSION}-bullseye
 
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive && \
-    apt-get -y install --no-install-recommends bash-completion 
+    apt-get -y install --no-install-recommends bash-completion
 
 RUN mkdir /opt/nats/ && \
     ln -s /opt/nats/nats-server /usr/local/bin/nats-server
@@ -18,6 +18,7 @@ ARG KIND_CLI_VERSION=0.17.0
 
 RUN go install github.com/nats-io/natscli/nats@v$NATS_CLI_VERSION && \
     go install sigs.k8s.io/kind@v$KIND_CLI_VERSION && \
+    go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest && \
     chmod -R a+w /go/pkg
 
 ARG HAPROXY_VERSION=0.6.4
