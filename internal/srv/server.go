@@ -41,13 +41,12 @@ type Server struct {
 	ServicePortKey   string
 	ContainerPortKey string
 	MetricsPort      int
-	LoadBalancers    map[string]*runner
+	Runner           runner
 }
 
 // Run will start the server queue connections and healthcheck endpoints
 func (s *Server) Run(ctx context.Context) error {
-	// TODO: load up the loadbalancers that this operator is responsible for
-	s.LoadBalancers = make(map[string]*runner)
+	s.Runner = InitLBTaskRunner(ctx)
 
 	s.Echo.AddHandler(s)
 
@@ -80,6 +79,8 @@ func (s *Server) Shutdown() error {
 		s.Logger.Debugw("Unable to shutdown connection", "error", err)
 		return err
 	}
+
+	s.Runner.stop()
 
 	return nil
 }
@@ -117,4 +118,9 @@ func (s *Server) configureSubscribers(ctx context.Context) error {
 	s.eventChannels = ev
 
 	return nil
+}
+
+func InitLBTaskRunner(ctx context.Context) runner {
+	r := NewRunner(ctx, process)
+	return *r
 }
